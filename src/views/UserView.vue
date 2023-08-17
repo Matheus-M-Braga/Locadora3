@@ -178,8 +178,8 @@ export default {
       filter(value, search) {
          return value != null &&
             search != null &&
-            typeof value === 'string' &&
-            value.toLowerCase().indexOf(search.toLowerCase()) !== -1
+            (typeof value === 'string' || typeof value === 'number') && 
+            value.toString().toLowerCase().indexOf(search.toLowerCase()) !== -1;
       },
       // Listar
       fetchUsers() {

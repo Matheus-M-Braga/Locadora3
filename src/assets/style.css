@@ -84,6 +84,9 @@ html,
    .searchbar{
       width: 50%;
    }
+   .chartPie{
+      height: 180px;
+   }
 }
 
 .row.table{
