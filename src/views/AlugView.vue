@@ -220,14 +220,14 @@ export default {
    methods: {
       // search
       filter(value, search) {
-         if (search === "") return true; // Mostrar todos os resultados se a pesquisa estiver vazia
-         if (value === null) return false; // Excluir linhas com valores nulos
+         if (search === "") return true; 
+         if (value === null) return false; 
 
-         const searchDate = this.convertSearchToDate(search); // Converter entrada de pesquisa em data
+         const searchDate = this.convertSearchToDate(search); 
 
          if (searchDate) {
             const entryDate = new Date(value);
-            entryDate.setHours(0, 0, 0, 0); // Definir horas para 00:00:00 para comparação
+            entryDate.setHours(0, 0, 0, 0); 
             searchDate.setHours(0, 0, 0, 0);
             return entryDate.getTime() === searchDate.getTime();
          } else {
@@ -240,7 +240,7 @@ export default {
          const parts = search.split('/');
          if (parts.length === 3) {
             const day = parseInt(parts[0], 10) - 1;
-            const month = parseInt(parts[1], 10) - 1; // Subtract 1 from month to adjust for 0-based indexing
+            const month = parseInt(parts[1], 10) - 1; 
             const year = parseInt(parts[2], 10);
             if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
                return new Date(year, month, day);
