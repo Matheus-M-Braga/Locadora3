@@ -7,7 +7,7 @@
                <v-layout flex class="header_side">
                   <v-app-bar-nav-icon large @click="isDrawerOpen = !isDrawerOpen" class="menu_icon"></v-app-bar-nav-icon>
                   <div class="d-flex align-center white--text" style="font-size: 22px;">
-                     <v-icon>mdi-bookshelf</v-icon>WDA LIVRARIA
+                     <v-icon>mdi-bookshelf</v-icon>WDA Livraria
                   </div>
                   <div>
                </div>

@@ -150,13 +150,13 @@ export default {
   watch: {
     books: {
       handler() {
-        this.updateCharts();
+        this.updatePieChart();
       },
       deep: true,
     },
     alugs: {
       handler() {
-        this.updateCharts();
+        this.updateBarChart();
       },
       deep: true,
     }
@@ -168,8 +168,6 @@ export default {
         .then(response => {
           this.books = response.data
           this.CalcDisp()
-          this.CalcDispId()
-          this.SortQuant()
         })
         .catch((error) => {
           console.error("Erro na busca de livros", error)
@@ -181,13 +179,7 @@ export default {
         .then(response => {
           this.alugs = response.data
           this.totalCalc()
-          this.alugsPends = this.alugs.filter(alug => !alug.data_devolucao);
-          this.alugsDevol = this.alugs.filter(alug => alug.data_devolucao);
-          this.CalcMaisAlug()
-          const ultimo = this.alugs.reduce((prev, current) => {
-            return prev.id < current.id ? current : prev;
-          });
-          this.ultimoAlug = ultimo.livro_id.nome
+          this.CalcAlug()
         })
         .catch((error) => {
           console.error("Erro na busca de aluguéis", error)
@@ -197,20 +189,28 @@ export default {
     CalcDisp() {
       // Total disponível
       this.totalDisp = this.books.reduce((total, book) => total + book.quantidade, 0)
+
       // Quantidade dos livros disponíveis
       this.books.forEach(book => {
         this.$set(this.DispId, book.nome, book.quantidade);
       });
+
       // Ordena os livros de acordo com a disponibilidade
       this.books.sort((a, b) => b.quantidade - a.quantidade);
     },
     totalCalc() {
-      // filtra so os alugueis que nao estao devolvidos
+      // filtra so os alugueis que nao estão devolvidos
       const filtereds = this.alugs.filter(alug => !alug.data_devolucao);
-      // armazena o total 
+      // armazena o total de livros
       this.total = this.totalDisp + filtereds.length
     },
-    CalcMaisAlug() {
+    // Aluguéis
+    CalcAlug() {
+      // Pendentes e Devolvidos
+      this.alugsPends = this.alugs.filter(alug => !alug.data_devolucao);
+      this.alugsDevol = this.alugs.filter(alug => alug.data_devolucao);
+
+      // Mais alugados
       const AlugsCount = {};
       this.alugs.forEach(alug => {
         const livronome = alug.livro_id.nome;
@@ -223,7 +223,14 @@ export default {
       this.maisalugados = Object.keys(AlugsCount)
         .sort((a, b) => AlugsCount[b] - AlugsCount[a])
         .map(livronome => ({ livronome, quantidade: AlugsCount[livronome] }));
+    
+      // Último alugado
+      const ultimo = this.alugs.reduce((prev, current) => {
+        return prev.id < current.id ? current : prev;
+      });
+      this.ultimoAlug = ultimo.livro_id.nome
     },
+    // Função pra reduzir as labels do gráfico de barra
     truncateLabel(label) {
       const maxLength = 13;
       if (label.length > maxLength) {
@@ -232,7 +239,7 @@ export default {
       return label;
     },
     // graficos
-    updateCharts() {
+    updateBarChart() {
       // Barra
       const ctx = this.$refs.myChart.getContext('2d');
       new Chart(ctx, {
@@ -279,6 +286,8 @@ export default {
           }
         }
       });
+    },
+    updatePieChart() {
       // Torta/Pizza
       const ctz = this.$refs.myPieChart.getContext('2d');
       new Chart(ctz, {

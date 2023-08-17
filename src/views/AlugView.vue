@@ -140,7 +140,7 @@ import Aluguel from "@/services/alug"
 import Livro from "@/services/book";
 import Usuario from "@/services/users";
 import Swal from "sweetalert2";
-// import { format } from 'date-fns-tz';
+// import { isValid, parseISO } from 'date-fns';
 import { validationMixin } from 'vuelidate';
 import { required, maxLength } from 'vuelidate/lib/validators';
 export default {
@@ -220,10 +220,33 @@ export default {
    methods: {
       // search
       filter(value, search) {
-         return value != null &&
-            search != null &&
-            typeof value === 'string' &&
-            value.toLowerCase().indexOf(search.toLowerCase()) !== -1
+         if (search === "") return true; // Mostrar todos os resultados se a pesquisa estiver vazia
+         if (value === null) return false; // Excluir linhas com valores nulos
+
+         const searchDate = this.convertSearchToDate(search); // Converter entrada de pesquisa em data
+
+         if (searchDate) {
+            const entryDate = new Date(value);
+            entryDate.setHours(0, 0, 0, 0); // Definir horas para 00:00:00 para comparação
+            searchDate.setHours(0, 0, 0, 0);
+            return entryDate.getTime() === searchDate.getTime();
+         } else {
+            // Tratar como pesquisa de texto normal
+            const lowercaseValue = String(value).toLowerCase();
+            return lowercaseValue.includes(search.toLowerCase());
+         }
+      },
+      convertSearchToDate(search) {
+         const parts = search.split('/');
+         if (parts.length === 3) {
+            const day = parseInt(parts[0], 10) - 1;
+            const month = parseInt(parts[1], 10) - 1; // Subtract 1 from month to adjust for 0-based indexing
+            const year = parseInt(parts[2], 10);
+            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+               return new Date(year, month, day);
+            }
+         }
+         return null;
       },
       // calculo do status
       statusCalculado(aluguel) {
@@ -257,7 +280,8 @@ export default {
       formatDate(dateString) {
          const utcDate = new Date(dateString);
          const localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000);
-         return localDate.toLocaleDateString('pt-BR');
+         const options = { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' };
+         return localDate.toLocaleDateString('pt-BR', options);
       },
       // Listar
       fetchAlugs() {
