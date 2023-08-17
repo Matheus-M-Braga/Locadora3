@@ -33,7 +33,7 @@
                      <v-icon class="mr-2" @click="openModalDevol(item)">
                         mdi-book
                      </v-icon>
-                     <v-icon class="mr-2" @click="openModalDelete(item)">
+                     <v-icon class="mr-2" @click="openModalDelete(item)">  
                         mdi-delete
                      </v-icon>
                   </td>
@@ -376,20 +376,6 @@ export default {
                      })
                   })
             }
-            // Caso contrário, edita
-            // else {
-            //    const selectedLivro = this.listBooks.find((livro) => livro.nome === this.livro_id)
-            //    const selectedUsuario = this.listUsers.find((usuario) => usuario.nome === this.usuario_id)
-
-            //    const AlugEditado = {
-            //       id: this.selectedAlugId,
-            //       livro_id: selectedLivro ? { ...selectedLivro } : this.livro_id,
-            //       usuario_id: selectedUsuario ? { ...selectedUsuario } : this.usuario_id,
-            //       data_aluguel: this.data_aluguel,
-            //       data_previsao: this.data_previsao
-            //    }
-            //    console.log(AlugEditado)
-            // }
          }
       },
       // Excluir
