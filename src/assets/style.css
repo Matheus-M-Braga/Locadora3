@@ -95,3 +95,7 @@ html,
 .v-data-table {
    width: 100%;
 }
+
+div.v-dialog:not(.v-dialog--fullscreen) {
+   max-height: 95%;
+}

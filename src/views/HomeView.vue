@@ -193,16 +193,15 @@ export default {
           console.error("Erro na busca de aluguéis", error)
         })
     },
-    // calculos de livros
+    // Livros
     CalcDisp() {
+      // Total disponível
       this.totalDisp = this.books.reduce((total, book) => total + book.quantidade, 0)
-    },
-    CalcDispId() {
+      // Quantidade dos livros disponíveis
       this.books.forEach(book => {
         this.$set(this.DispId, book.nome, book.quantidade);
       });
-    },
-    SortQuant() {
+      // Ordena os livros de acordo com a disponibilidade
       this.books.sort((a, b) => b.quantidade - a.quantidade);
     },
     totalCalc() {
@@ -234,8 +233,8 @@ export default {
     },
     // graficos
     updateCharts() {
+      // Barra
       const ctx = this.$refs.myChart.getContext('2d');
-      const ctz = this.$refs.myPieChart.getContext('2d');
       new Chart(ctx, {
         type: 'bar',
         data: {
@@ -271,11 +270,17 @@ export default {
           },
           scales: {
             y: {
-              beginAtZero: false
-            }
+              beginAtZero: true,
+              grid: {
+                offset: false
+              }
+            },
+
           }
         }
       });
+      // Torta/Pizza
+      const ctz = this.$refs.myPieChart.getContext('2d');
       new Chart(ctz, {
         type: 'pie',
         data: {
