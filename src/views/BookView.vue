@@ -202,6 +202,7 @@ export default {
          Livro.list()
             .then(response => {
                this.books = response.data
+               console.log(this.books)
             })
             .catch((error) => {
                console.error("Erro na busca de livros", error)
@@ -265,7 +266,7 @@ export default {
                         icon: 'success',
                         title: 'Livro adicionado com êxito!',
                         showConfirmButton: false,
-                        timer: 1700,
+                        timer: 3500,
                      });
                      this.closeModal();
                      this.fetchBooks();
@@ -275,8 +276,9 @@ export default {
                      Swal.fire({
                         icon: 'error',
                         title: 'Erro ao adicionar o livro.',
+                        text: error.response.data.error,
                         showConfirmButton: false,
-                        timer: 1700,
+                        timer: 3500,
                      });
                   });
             }
@@ -304,7 +306,7 @@ export default {
                         icon: 'success',
                         title: 'Livro atualizado com êxito!',
                         showConfirmButton: false,
-                        timer: 1700,
+                        timer: 3500,
                      });
                      this.closeModal();
                      this.fetchBooks();
@@ -314,8 +316,9 @@ export default {
                      Swal.fire({
                         icon: 'error',
                         title: 'Erro ao atualizar o livro.',
+                        text: error.response.data.error,
                         showConfirmButton: false,
-                        timer: 1700,
+                        timer: 3500,
                      });
                   });
             }
@@ -349,27 +352,22 @@ export default {
                      icon: 'success',
                      title: 'Livro deletado com êxito!',
                      showConfirmButton: false,
-                     timer: 1700,
+                     timer: 3500,
                   });
                   this.removerLivroDaLista(deleteLivro.id);
                   this.closeModalDelete()
-               } else {
-                  Swal.fire({
-                     icon: 'error',
-                     title: 'Erro ao deletar o livro.',
-                     showConfirmButton: false,
-                     timer: 1700,
-                  });
-               }
+               } 
             })
             .catch((e) => {
                console.error("Erro ao deletar o livro:", e);
                Swal.fire({
                   icon: 'error',
                   title: 'Erro ao deletar o livro.',
+                  text: e.response.data.error,
                   showConfirmButton: false,
-                  timer: 1700,
+                  timer: 3500,
                });
+               this.closeModalDelete();
             });
       },
       removerLivroDaLista(livroId) {

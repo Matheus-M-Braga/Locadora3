@@ -237,7 +237,7 @@ export default {
                         icon: 'success',
                         title: 'Usuário adicionado com êxito!',
                         showConfirmButton: false,
-                        timer: 1700,
+                        timer: 3500,
                      });
                      this.closeModal();
                   })
@@ -246,8 +246,9 @@ export default {
                      Swal.fire({
                         icon: 'error',
                         title: 'Erro ao adicionar usuário.',
+                        text: error.response.data.error,
                         showConfirmButton: false,
-                        timer: 1700,
+                        timer: 3500,
                      });
                   });
             }
@@ -274,7 +275,7 @@ export default {
                         icon: 'success',
                         title: 'Usuário atualizado com êxito!',
                         showConfirmButton: false,
-                        timer: 1700,
+                        timer: 3500,
                      });
                      this.closeModal();
                   })
@@ -283,9 +284,11 @@ export default {
                      Swal.fire({
                         icon: 'success',
                         title: 'Erro ao atualizar usuário.',
+                        text: error.response.data.error,
                         showConfirmButton: false,
-                        timer: 1700,
+                        timer: 3500,
                      });
+                     this.closeModal();
                   });
             }
          }
@@ -317,7 +320,7 @@ export default {
                      icon: 'success',
                      title: 'Usuário deletado com êxito!',
                      showConfirmButton: false,
-                     timer: 1700,
+                     timer: 3500,
                   });
                   this.removerUsuarioDaLista(deleteUsuario.id);
                   this.dialogDelete = false
@@ -326,7 +329,7 @@ export default {
                      icon: 'error',
                      title: 'Erro ao deletar usuário.',
                      showConfirmButton: false,
-                     timer: 1700,
+                     timer: 3500,
                   });
                }
             })
@@ -335,9 +338,11 @@ export default {
                Swal.fire({
                   icon: 'error',
                   title: 'Erro ao deletar usuário.',
+                  text: e.response.data.error,
                   showConfirmButton: false,
-                  timer: 1700,
+                  timer: 3500,
                });
+               this.closeModalDelete();
             });
 
       },

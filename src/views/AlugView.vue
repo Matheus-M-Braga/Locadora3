@@ -25,7 +25,8 @@
                </template>
                <template v-slot:[`item.status`]="{ item }">
                   <td>
-                     <v-chip :class="statusClass(item)" class="black--text">{{ statusCalculado(item) }}</v-chip>
+                     <v-chip :class="statusClass(item)" class="black--text">{{ item.status = statusCalculado(item)
+                     }}</v-chip>
                   </td>
                </template>
                <template v-slot:[`item.acoes`]="{ item }">
@@ -33,7 +34,7 @@
                      <v-icon class="mr-2" @click="openModalDevol(item)">
                         mdi-book
                      </v-icon>
-                     <v-icon class="mr-2" @click="openModalDelete(item)">  
+                     <v-icon class="mr-2" @click="openModalDelete(item)">
                         mdi-delete
                      </v-icon>
                   </td>
@@ -163,7 +164,7 @@ export default {
             { text: 'Usuário', value: 'usuario_id.nome' },
             { text: 'Data do Aluguel', value: 'data_aluguel' },
             { text: 'Previsão de Devolução', value: 'data_previsao' },
-            { text: 'Status', value: 'status', align: 'center', sortable: false },
+            { text: 'Status', value: 'status' },
             { text: 'Ações', value: 'acoes', sortable: false },
          ],
          alugs: [],
@@ -216,32 +217,42 @@ export default {
       this.fetchAlugs()
       this.fetchBooks()
       this.fetchUsers()
+      this.sortAlugsById()
    },
    methods: {
+      // sex
+      compareAlugById(a, b) {
+         return a.id - b.id;
+      },
+
+      // Função para ordenar os aluguéis pelo ID
+      sortAlugsById() {
+         this.alugs.sort(this.compareAlugById);
+      },
       // search
       filter(value, search) {
-         if (search === "") return true; 
-         if (value === null) return false; 
+         if (search === "") return true;
+         if (value === null) return false;
 
-         const searchDate = this.convertSearchToDate(search); 
+         const searchDate = this.convertSearchToDate(search);
 
          if (searchDate) {
             const entryDate = new Date(value);
-            entryDate.setHours(0, 0, 0, 0); 
+            entryDate.setHours(0, 0, 0, 0);
             searchDate.setHours(0, 0, 0, 0);
             return entryDate.getTime() === searchDate.getTime();
          } else {
-            // Tratar como pesquisa de texto normal
+            // Texto normal
             const lowercaseValue = String(value).toLowerCase();
-            return lowercaseValue.includes(search.toLowerCase());
+            return lowercaseValue.includes(search.toLowerCase())
          }
       },
       convertSearchToDate(search) {
          const parts = search.split('/');
-         if (parts.length === 3) {
+         if (parts.length >= 2 && parts.length <= 3) {
             const day = parseInt(parts[0], 10) - 1;
-            const month = parseInt(parts[1], 10) - 1; 
-            const year = parseInt(parts[2], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const year = parts.length === 3 ? parseInt(parts[2], 10) : new Date().getFullYear();
             if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
                return new Date(year, month, day);
             }
@@ -357,22 +368,25 @@ export default {
                Aluguel.create(novoAlug)
                   .then((response) => {
                      this.alugs.push({ id: response.data.id, ...novoAlug })
+                     
                      Swal.fire({
                         icon: 'success',
                         title: 'Aluguel adicionado com êxito!',
                         showConfirmButton: false,
-                        timer: 1700,
+                        timer: 3500,
                      })
                      this.closeModal()
                      this.fetchAlugs()
+                     console.log(response)
                   })
                   .catch((error) => {
                      console.error("Erro ao adicionar o aluguel:", error)
                      Swal.fire({
                         icon: 'error',
-                        title: 'Erro ao adicionar o aluguel!',
+                        title: 'Erro ao adicionar o aluguel: ', 
+                        text: error.response.data.error,
                         showConfirmButton: false,
-                        timer: 1700,
+                        timer: 3500,
                      })
                   })
             }
@@ -407,7 +421,7 @@ export default {
                      icon: 'success',
                      title: 'Aluguel deletado com êxito!',
                      showConfirmButton: false,
-                     timer: 1700,
+                     timer: 3500,
                   })
                   this.removerAluguelDaLista(deleteAlug.id)
                   this.closeModalDelete()
@@ -418,7 +432,7 @@ export default {
                      icon: 'error',
                      title: 'Erro ao deletar aluguel!',
                      showConfirmButton: false,
-                     timer: 1700,
+                     timer: 3500,
                   });
                }
             })
@@ -428,9 +442,11 @@ export default {
                Swal.fire({
                   icon: 'error',
                   title: 'Erro ao deletar aluguel!',
+                  text: e.response.data.error,
                   showConfirmButton: false,
-                  timer: 1700,
+                  timer: 3500,
                })
+               this.closeModalDelete();
             })
       },
       removerAluguelDaLista(aluguelId) {
@@ -451,7 +467,7 @@ export default {
                icon: 'error',
                title: 'Livro já foi devolvido!',
                showConfirmButton: false,
-               timer: 1700,
+               timer: 3500,
             })
             this.closeModalDevol()
          }
@@ -482,18 +498,20 @@ export default {
                   icon: 'success',
                   title: 'Devolução realizada com êxito!',
                   showConfirmButton: false,
-                  timer: 1700,
+                  timer: 3500,
                });
                this.closeModalDevol()
                this.fetchAlugs()
+               this.removerAluguelDaLista(AlugDevolvido.id)
             })
             .catch((error) => {
                console.error("Erro ao devolver aluguel:", error)
                Swal.fire({
                   icon: 'error',
                   title: 'Erro ao realizar devolução!',
+                  text: error.response.data.error,
                   showConfirmButton: false,
-                  timer: 1700,
+                  timer: 3500,
                });
             })
       },

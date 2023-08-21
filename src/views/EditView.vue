@@ -145,12 +145,10 @@ export default {
   methods: {
     // Search
     filter(value, search) {
-      return (
-        value != null &&
+      return value != null &&
         search != null &&
-        typeof value === "string" &&
-        value.toLowerCase().indexOf(search.toLowerCase()) !== -1
-      );
+        (typeof value === 'string' || typeof value === 'number') &&
+        value.toString().toLowerCase().indexOf(search.toLowerCase()) !== -1;
     },
     // Listar
     fetchEdits() {
@@ -201,7 +199,7 @@ export default {
                 icon: 'success',
                 title: 'Editora adicionada com êxito!',
                 showConfirmButton: false,
-                timer: 1700,
+                timer: 3500,
               });
               this.closeModal();
             })
@@ -210,8 +208,9 @@ export default {
               Swal.fire({
                 icon: 'error',
                 title: 'Erro ao adicionar editora.',
+                text: error.response.data.error,
                 showConfirmButton: false,
-                timer: 1700,
+                timer: 3500,
               })
             });
 
@@ -236,7 +235,7 @@ export default {
                 icon: 'success',
                 title: 'Editora atualizada com êxito!',
                 showConfirmButton: false,
-                timer: 1700,
+                timer: 3500,
               });
               this.closeModal();
             })
@@ -245,8 +244,9 @@ export default {
               Swal.fire({
                 icon: 'error',
                 title: 'Erro ao atualizar editora.',
+                text: error.response.data.error,
                 showConfirmButton: false,
-                timer: 1700,
+                timer: 3500,
               })
             });
         }
@@ -275,7 +275,7 @@ export default {
               icon: 'success',
               title: 'Editora deletada com êxito!',
               showConfirmButton: false,
-              timer: 1700,
+              timer: 3500,
             });
             this.removerEditoraDaLista(deleteEditora.id);
           } else {
@@ -283,7 +283,7 @@ export default {
               icon: 'error',
               title: 'Erro ao deletar editora.',
               showConfirmButton: false,
-              timer: 1700,
+              timer: 3500,
             });
           }
         })
@@ -292,9 +292,11 @@ export default {
           Swal.fire({
             icon: 'error',
             title: 'Erro ao deletar editora.',
+            text: e.response.data.error,
             showConfirmButton: false,
-            timer: 1700,
+            timer: 3500,
           });
+          this.closeModalDelete();
         });
       this.dialogDelete = false
     },
