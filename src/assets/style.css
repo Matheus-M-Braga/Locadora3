@@ -7,13 +7,14 @@ html,
 }
 
 .container_master {
-   padding: 25px;
+   padding: 15px;
    overflow-y: auto;
    height: 95vh;
 }
 
 .container_master::-webkit-scrollbar {
    width: 8px;
+
 }
 
 .container_master::-webkit-scrollbar-thumb {
@@ -37,8 +38,9 @@ html,
    background-color: #1a1a1a;
 }
 /* dash */
-.v-card.theme--dark{
-   background: #020202;
+.theme--dark.v-card.card {
+   background-color: #2b2b2b;
+   color: #FFFFFF;
 }
 
 

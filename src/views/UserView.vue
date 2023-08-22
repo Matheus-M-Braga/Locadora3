@@ -87,10 +87,10 @@
                </v-card-text>
                <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="green darken-1" text @click="closeModalDelete">
+                  <v-btn color="red darken-1" text @click="closeModalDelete">
                      Cancelar
                   </v-btn>
-                  <v-btn color="red darken-1" text @click="confirmDelete">
+                  <v-btn color="green darken-1" text @click="confirmDelete">
                      Confirmar
                   </v-btn>
                </v-card-actions>

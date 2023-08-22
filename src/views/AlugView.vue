@@ -12,21 +12,15 @@
             </div>
          </v-layout>
          <v-layout row wrap class="table">
-            <v-data-table dark :headers="headers" :items="alugs" :items-per-page="5" class="elevation-1" :search="search"
-               :custom-filter="filter" :no-results-text="noDataText" :footer-props="{
+            <v-data-table dark :headers="headers" :sort-by="['id']" :sort-desc="[false, true]" :items="filteredRentals"
+               :items-per-page="5" class="elevation-1" 
+               :no-results-text="noDataText" :footer-props="{
                   'items-per-page-text': 'Registros por página',
                   'items-per-page-options': [5, 10, 15, this.alugs.length]
                }">
-               <template v-slot:[`item.data_aluguel`]="{ item }">
-                  <td>{{ formatDate(item.data_aluguel) }}</td>
-               </template>
-               <template v-slot:[`item.data_previsao`]="{ item }">
-                  <td>{{ formatDate(item.data_previsao) }}</td>
-               </template>
                <template v-slot:[`item.status`]="{ item }">
                   <td>
-                     <v-chip :class="statusClass(item)" class="black--text">{{ item.status = statusCalculado(item)
-                     }}</v-chip>
+                     <v-chip :class="statusClass(item)" class="black--text">{{ item.status }}</v-chip>
                   </td>
                </template>
                <template v-slot:[`item.acoes`]="{ item }">
@@ -99,10 +93,10 @@
                </v-card-text>
                <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="green darken-1" text @click="closeModalDelete">
+                  <v-btn color="red darken-1" text @click="closeModalDelete">
                      Cancelar
                   </v-btn>
-                  <v-btn color="red darken-1" text @click="confirmDelete">
+                  <v-btn color="green darken-1" text @click="confirmDelete">
                      Confirmar
                   </v-btn>
                </v-card-actions>
@@ -160,8 +154,8 @@ export default {
          ModalTitle: "",
          headers: [
             { text: 'ID', value: 'id' },
-            { text: 'Livro', align: 'start', value: 'livro_id.nome' },
-            { text: 'Usuário', value: 'usuario_id.nome' },
+            { text: 'Livro', align: 'start', value: 'livro_id' },
+            { text: 'Usuário', value: 'usuario_id' },
             { text: 'Data do Aluguel', value: 'data_aluguel' },
             { text: 'Previsão de Devolução', value: 'data_previsao' },
             { text: 'Status', value: 'status' },
@@ -212,46 +206,29 @@ export default {
          !this.$v.data_previsao.required && errors.push('Informe a previsão de devolução.')
          return errors
       },
+      filteredRentals() {
+         const searchValue = this.search.toLowerCase();
+         return this.alugs.filter((rental) => {
+            for (const prop in rental) {
+               const propValue = rental[prop].toString().toLowerCase();
+               if (propValue.includes(searchValue)) {
+                  return true;
+               }
+            }
+            return false;
+         });
+      },
    },
    mounted() {
       this.fetchAlugs()
-      this.fetchBooks()
-      this.fetchUsers()
-      this.sortAlugsById()
    },
    methods: {
-      // sex
-      compareAlugById(a, b) {
-         return a.id - b.id;
-      },
-
-      // Função para ordenar os aluguéis pelo ID
-      sortAlugsById() {
-         this.alugs.sort(this.compareAlugById);
-      },
       // search
-      filter(value, search) {
-         if (search === "") return true;
-         if (value === null) return false;
-
-         const searchDate = this.convertSearchToDate(search);
-
-         if (searchDate) {
-            const entryDate = new Date(value);
-            entryDate.setHours(0, 0, 0, 0);
-            searchDate.setHours(0, 0, 0, 0);
-            return entryDate.getTime() === searchDate.getTime();
-         } else {
-            // Texto normal
-            const lowercaseValue = String(value).toLowerCase();
-            return lowercaseValue.includes(search.toLowerCase())
-         }
-      },
       convertSearchToDate(search) {
          const parts = search.split('/');
          if (parts.length >= 2 && parts.length <= 3) {
-            const day = parseInt(parts[0], 10) - 1;
-            const month = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
             const year = parts.length === 3 ? parseInt(parts[2], 10) : new Date().getFullYear();
             if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
                return new Date(year, month, day);
@@ -259,32 +236,13 @@ export default {
          }
          return null;
       },
-      // calculo do status
-      statusCalculado(aluguel) {
-         const hoje = new Date()
-         const previsao = new Date(aluguel.data_previsao)
-         if (aluguel.data_devolucao === null) {
-            if (hoje > previsao) {
-               return "Em atraso";
-            } else if (hoje <= previsao) {
-               return "Pendente";
-            }
+      statusClass(item) {
+         if ((item.status == "Atrasado")) {
+            return "red";
+         } else if ((item.status == "No prazo")) {
+            return "green";
          } else {
-            return "Devolvido";
-         }
-      },
-      statusClass(aluguel) {
-         if (aluguel.data_devolucao === null) {
-            const hoje = new Date();
-            const previsao = new Date(aluguel.data_previsao);
-
-            if (hoje > previsao) {
-               return 'red';
-            } else {
-               return 'yellow';
-            }
-         } else {
-            return 'green';
+            return "yellow";
          }
       },
       // Formatar datas
@@ -295,32 +253,49 @@ export default {
          return localDate.toLocaleDateString('pt-BR', options);
       },
       // Listar
-      fetchAlugs() {
-         Aluguel.list()
-            .then(response => {
-               this.alugs = response.data
-            })
-            .catch((error) => {
-               console.error("Erro na busca de aluguéis", error)
-            })
-      },
-      fetchBooks() {
-         Livro.list()
-            .then(response => {
-               this.listBooks = response.data
-            })
-            .catch((error) => {
-               console.error("Erro na busca de livros", error)
+      async fetchAlugs() {
+         try {
+            const [booksResponse, rentalsResponse, usersResponse] =
+               await Promise.all([Livro.list(), Aluguel.list(), Usuario.list()]);
+
+            this.listBooks = booksResponse.data.map((livro) => ({
+               id: livro.id,
+               nome: livro.nome,
+            }));
+
+            this.listUsers = usersResponse.data.map((usuario) => ({
+               id: usuario.id,
+               nome: usuario.nome,
+            }));
+
+            this.alugs = rentalsResponse.data.map((rental) => {
+               const devolucaoDate = rental.data_devolucao;
+               const previsaoDate = rental.data_previsao;
+               let statusInfo;
+               if (devolucaoDate !== null) {
+                  if (devolucaoDate > previsaoDate) {
+                     statusInfo = "Atrasado";
+                  } else {
+                     statusInfo = "No prazo";
+                  }
+               } else {
+                  statusInfo = "Pendente";
+               }
+               return {
+                  id: rental.id,
+                  livro_id: rental.livro_id.nome,
+                  usuario_id: rental.usuario_id.nome,
+                  data_aluguel: this.formatDate(rental.data_aluguel),
+                  data_previsao: this.formatDate(rental.data_previsao),
+                  data_devolucao: rental.data_devolucao
+                     ? this.formatDate(rental.data_devolucao)
+                     : "Pendente",
+                  status: statusInfo,
+               };
             });
-      },
-      fetchUsers() {
-         Usuario.list()
-            .then((response) => {
-               this.listUsers = response.data;
-            })
-            .catch((error) => {
-               console.error("Erro ao buscar usuarios", error);
-            });
+         } catch (error) {
+            console.error("Erro ao buscar informações:", error);
+         }
       },
       // Abrir o modal para adicionar
       openModalCreate() {
@@ -333,6 +308,7 @@ export default {
          this.data_aluguel = new Date().toISOString().substr(0, 10)
          this.data_previsao = ""
          this.data_devolucao = ""
+         this.status = "Pendente"
       },
       // Abrir o modal para editar
       openModalEdit(aluguel) {
@@ -364,11 +340,12 @@ export default {
                   usuario_id: selectedUsuario,
                   data_aluguel: this.data_aluguel,
                   data_previsao: this.data_previsao,
+                  status: "Pendente"
                }
                Aluguel.create(novoAlug)
                   .then((response) => {
                      this.alugs.push({ id: response.data.id, ...novoAlug })
-                     
+
                      Swal.fire({
                         icon: 'success',
                         title: 'Aluguel adicionado com êxito!',
@@ -383,7 +360,7 @@ export default {
                      console.error("Erro ao adicionar o aluguel:", error)
                      Swal.fire({
                         icon: 'error',
-                        title: 'Erro ao adicionar o aluguel: ', 
+                        title: 'Erro ao adicionar o aluguel: ',
                         text: error.response.data.error,
                         showConfirmButton: false,
                         timer: 3500,
@@ -460,6 +437,7 @@ export default {
             this.usuario_id = aluguel.usuario_id
             this.data_aluguel = aluguel.data_aluguel
             this.data_previsao = aluguel.data_previsao
+            this.status = "Devolvido"
             this.dialogDevol = true
          }
          else {
@@ -483,6 +461,7 @@ export default {
             data_aluguel: this.data_aluguel,
             data_previsao: this.data_previsao,
             data_devolucao: new Date().toISOString().substr(0, 10),
+            status: "Devolvido"
          }
          Aluguel.update(AlugDevolvido)
             .then(() => {

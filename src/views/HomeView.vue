@@ -1,19 +1,10 @@
 <template>
   <div class="container_master">
     <v-container>
+      <!-- graficos -->
       <v-layout row justify-space-between>
-        <v-flex sm6 xs12 md6>
-          <div class="chart_container">
-            <div class="title text-center">Livros mais alugados</div>
-            <canvas ref="myChart" width="450" height="200" class="chartBar"></canvas>
-          </div>
-        </v-flex>
-        <v-flex sm6 xs12 md6>
-          <div class="chart_container">
-            <div class="title text-center">Livros disponíveis</div>
-            <canvas ref="myPieChart" width="450" height="200" class="chartPie"></canvas>
-          </div>
-        </v-flex>
+        <LineChart />
+        <PieChart />
       </v-layout>
       <v-layout row justify-center>
         <!-- ultimo alugado-->
@@ -62,9 +53,9 @@
                 </v-sheet>
               </v-list-item-avatar>
               <v-list-item-content>
-                <div class="title">Total de livros</div>
+                <div class="title">Livros alugados</div>
                 <br><br><br>
-                <v-list-item-title class="mb-1">{{ total }}</v-list-item-title>
+                <v-list-item-title class="mb-1">{{ this.renteds }}</v-list-item-title>
                 <div><v-divider></v-divider></div>
               </v-list-item-content>
             </v-list-item>
@@ -75,13 +66,13 @@
             <v-list-item>
               <v-list-item-avatar tile="" class="mt-n7">
                 <v-sheet color="blue-grey darken-2" width="80" height="80" elevation="10">
-                  <v-icon dark large>mdi-book-account</v-icon>
+                  <v-icon dark large>mdi-book-multiple</v-icon>
                 </v-sheet>
               </v-list-item-avatar>
               <v-list-item-content>
-                <div class="title">Aluguéis</div>
+                <div class="title">Total de Aluguéis</div>
                 <br><br><br>
-                <v-list-item-title class="mb-1">Total: {{ alugs.length }}</v-list-item-title>
+                <v-list-item-title class="mb-1">{{ this.alugs.length }}</v-list-item-title>
                 <div><v-divider></v-divider></div>
               </v-list-item-content>
             </v-list-item>
@@ -92,13 +83,13 @@
             <v-list-item>
               <v-list-item-avatar tile="" class="mt-n7">
                 <v-sheet color="blue-grey darken-2" width="80" height="80" elevation="10">
-                  <v-icon dark large>mdi-book-refresh</v-icon>
+                  <v-icon dark large>mdi-book-multiple</v-icon>
                 </v-sheet>
               </v-list-item-avatar>
               <v-list-item-content>
-                <div class="title">Aluguéis</div>
+                <div class="title">Usuários cadastrados</div>
                 <br><br><br>
-                <v-list-item-title class="mb-1">Devolvidos: {{ alugsDevol.length }}</v-list-item-title>
+                <v-list-item-title class="mb-1">{{ this.users }}</v-list-item-title>
                 <div><v-divider></v-divider></div>
               </v-list-item-content>
             </v-list-item>
@@ -109,13 +100,13 @@
             <v-list-item>
               <v-list-item-avatar tile="" class="mt-n7">
                 <v-sheet color="blue-grey darken-2" width="80" height="80" elevation="10">
-                  <v-icon dark large>mdi-book-clock</v-icon>
+                  <v-icon dark large>mdi-book-multiple</v-icon>
                 </v-sheet>
               </v-list-item-avatar>
               <v-list-item-content>
-                <div class="title">Aluguéis</div>
+                <div class="title">Editoras cadastradas</div>
                 <br><br><br>
-                <v-list-item-title class="mb-1">Pendentes: {{ alugsPends.length }}</v-list-item-title>
+                <v-list-item-title class="mb-1">{{ this.publis }}</v-list-item-title>
                 <div><v-divider></v-divider></div>
               </v-list-item-content>
             </v-list-item>
@@ -127,39 +118,36 @@
 </template>
 
 <script>
-import Chart from 'chart.js'
+import LineChart from '@/components/LineChart'
+import PieChart from '@/components/PieChart'
+import User from '@/services/users'
 import Livro from '@/services/book'
+import Publi from '@/services/edit'
 import Aluguel from '@/services/alug'
 export default {
 
   data: () => ({
     books: [],
     totalDisp: 0,
+    renteds: 0,
+    users: 0,
+    publis: 0,
+    Listusers: [],
+    Listpublis: [],
     DispId: {},
     total: 0,
     alugs: [],
-    alugsPends: 0,
-    alugsDevol: 0,
     maisalugados: [],
     ultimoAlug: "",
   }),
   mounted() {
     this.fetchBooks()
     this.fetchAlugs()
+    this.fetchUsersPubli()
   },
-  watch: {
-    books: {
-      handler() {
-        this.updatePieChart();
-      },
-      deep: true,
-    },
-    alugs: {
-      handler() {
-        this.updateBarChart();
-      },
-      deep: true,
-    }
+  components: {
+    LineChart,
+    PieChart,
   },
   methods: {
     // listar livros
@@ -178,12 +166,22 @@ export default {
       Aluguel.list()
         .then(response => {
           this.alugs = response.data
-          this.totalCalc()
           this.CalcAlug()
+          this.totalCalc()
         })
         .catch((error) => {
           console.error("Erro na busca de aluguéis", error)
         })
+    },
+    fetchUsersPubli(){
+      User.list().then(response => {
+        this.Listusers = response.data
+        this.users = this.Listusers.length
+      })
+      Publi.list().then(response => {
+        this.Listpublis = response.data
+        this.publis = this.Listpublis.length
+      })
     },
     // Livros
     CalcDisp() {
@@ -203,131 +201,17 @@ export default {
       const filtereds = this.alugs.filter(alug => !alug.data_devolucao);
       // armazena o total de livros
       this.total = this.totalDisp + filtereds.length
+      this.renteds = filtereds.length
     },
     // Aluguéis
     CalcAlug() {
-      // Pendentes e Devolvidos
-      this.alugsPends = this.alugs.filter(alug => !alug.data_devolucao);
-      this.alugsDevol = this.alugs.filter(alug => alug.data_devolucao);
-
-      // Mais alugados
-      const AlugsCount = {};
-      this.alugs.forEach(alug => {
-        const livronome = alug.livro_id.nome;
-        if (AlugsCount[livronome]) {
-          AlugsCount[livronome]++;
-        } else {
-          AlugsCount[livronome] = 1;
-        }
-      });
-      this.maisalugados = Object.keys(AlugsCount)
-        .sort((a, b) => AlugsCount[b] - AlugsCount[a])
-        .map(livronome => ({ livronome, quantidade: AlugsCount[livronome] }));
-    
       // Último alugado
       const ultimo = this.alugs.reduce((prev, current) => {
         return prev.id < current.id ? current : prev;
       });
       this.ultimoAlug = ultimo.livro_id.nome
     },
-    // Função pra reduzir as labels do gráfico de barra
-    truncateLabel(label) {
-      const maxLength = 13;
-      if (label.length > maxLength) {
-        return label.substring(0, maxLength) + '...';
-      }
-      return label;
-    },
-    // graficos
-    updateBarChart() {
-      // Barra
-      const ctx = this.$refs.myChart.getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: [
-            this.truncateLabel(this.maisalugados[0].livronome),
-            this.truncateLabel(this.maisalugados[1].livronome),
-            this.truncateLabel(this.maisalugados[2].livronome),
-            this.truncateLabel(this.maisalugados[3].livronome),
-            this.truncateLabel(this.maisalugados[4].livronome),
-          ],
-          datasets: [{
-            label: '',
-            data: [
-              this.maisalugados[0].quantidade,
-              this.maisalugados[1].quantidade,
-              this.maisalugados[2].quantidade,
-              this.maisalugados[3].quantidade,
-              this.maisalugados[4].quantidade,
-            ],
-            backgroundColor: [
-              'rgb(105, 0, 12)',
-              'rgb(3, 100, 166)',
-              'rgb(217, 155, 2)',
-              'rgb(3, 166, 166)',
-              'rgb(72, 0, 217)',
-            ],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          legend: {
-            display: false,
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: {
-                offset: false
-              }
-            },
-
-          }
-        }
-      });
-    },
-    updatePieChart() {
-      // Torta/Pizza
-      const ctz = this.$refs.myPieChart.getContext('2d');
-      new Chart(ctz, {
-        type: 'pie',
-        data: {
-          labels: [
-            this.books[0].nome,
-            this.books[1].nome,
-            this.books[2].nome,
-            this.books[3].nome,
-            this.books[4].nome
-          ],
-          datasets: [{
-            label: '# Livro1',
-            data: [
-              this.books[0].quantidade,
-              this.books[1].quantidade,
-              this.books[2].quantidade,
-              this.books[3].quantidade,
-              this.books[4].quantidade
-            ],
-            backgroundColor: [
-              'rgb(105, 0, 12)',
-              'rgb(3, 100, 166)',
-              'rgb(217, 155, 2)',
-              'rgb(3, 166, 166)',
-              'rgb(72, 0, 217)',
-            ],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
-      });
-    }
+    
   }
 }
 </script>
