@@ -52,10 +52,9 @@
               <v-col cols="12">
                 <v-text-field
                   v-model="nome"
-                  :counter="30"
                   label="Nome"
                   required
-                  :error-messages="NomeError"
+                  :error-messages="NameError"
                   @input="$v.nome.$touch()"
                   @blur="$v.nome.$touch()"
                 ></v-text-field>
@@ -63,10 +62,9 @@
               <v-col cols="12">
                 <v-text-field
                   v-model="autor"
-                  :counter="30"
                   label="Autor"
                   required
-                  :error-messages="AutorError"
+                  :error-messages="AuthorError"
                   @input="$v.autor.$touch()"
                   @blur="$v.autor.$touch()"
                 ></v-text-field>
@@ -74,11 +72,11 @@
               <v-col cols="12">
                 <v-select
                   v-model="editora"
-                  :items="listEdits"
+                  :items="listPublishers"
                   item-text="nome"
                   label="Editora"
                   required
-                  :error-messages="EditoraError"
+                  :error-messages="PublisherError"
                   @input="$v.editora.$touch()"
                   @blur="$v.editora.$touch()"
                 ></v-select>
@@ -86,10 +84,9 @@
               <v-col cols="12">
                 <v-text-field
                   v-model="lancamento"
-                  :counter="30"
                   label="Lançamento"
                   required
-                  :error-messages="LancaError"
+                  :error-messages="DateError"
                   @input="$v.lancamento.$touch()"
                   @blur="$v.lancamento.$touch()"
                   type="number"
@@ -98,10 +95,9 @@
               <v-col cols="12">
                 <v-text-field
                   v-model="quantidade"
-                  :counter="30"
                   label="Quantidade"
                   required
-                  :error-messages="QuantiError"
+                  :error-messages="AmountError"
                   @input="$v.quantidade.$touch()"
                   @blur="$v.quantidade.$touch()"
                   type="number"
@@ -148,7 +144,7 @@
 
 <script>
 import Livro from "@/services/book";
-import Editora from "@/services/edit";
+import Publisher from "@/services/edit";
 import Swal from "sweetalert2";
 import { validationMixin } from "vuelidate";
 import { required, maxLength } from "vuelidate/lib/validators";
@@ -156,9 +152,9 @@ export default {
   mixins: [validationMixin],
 
   validations: {
-    nome: { required, maxLength: maxLength(30) },
-    autor: { required, maxLength: maxLength(30) },
-    editora: { required, maxLength: maxLength(30) },
+    nome: { required },
+    autor: { required },
+    editora: { required },
     lancamento: { required, maxLength: maxLength(4) },
     quantidade: { required, maxLength: maxLength(4) },
   },
@@ -178,7 +174,7 @@ export default {
         { text: "Ações", value: "acoes", sortable: false },
       ],
       books: [],
-      listEdits: [],
+      listPublishers: [],
       nome: "",
       autor: "",
       editora: "",
@@ -187,33 +183,30 @@ export default {
       totalalugado: 0,
       dialog: false,
       dialogDelete: false,
-      selectedLivroId: null,
+      bookId: null,
     };
   },
   computed: {
     // validacao
-    NomeError() {
+    NameError() {
       const errors = [];
       if (!this.$v.nome.$dirty) return errors;
-      !this.$v.nome.maxLength && errors.push("O limite é de 30 caracteres.");
       !this.$v.nome.required && errors.push("Informe o nome.");
       return errors;
     },
-    AutorError() {
+    AuthorError() {
       const errors = [];
       if (!this.$v.autor.$dirty) return errors;
-      !this.$v.autor.maxLength && errors.push("O limite é de 30 caracteres.");
       !this.$v.autor.required && errors.push("Informe o autor.");
       return errors;
     },
-    EditoraError() {
+    PublisherError() {
       const errors = [];
       if (!this.$v.editora.$dirty) return errors;
-      !this.$v.editora.maxLength && errors.push("O limite é de 30 caracteres.");
       !this.$v.editora.required && errors.push("Informe a editora.");
       return errors;
     },
-    LancaError() {
+    DateError() {
       const errors = [];
       if (!this.$v.lancamento.$dirty) return errors;
       !this.$v.lancamento.maxLength && errors.push("O limite é de 4 dígitos.");
@@ -221,7 +214,7 @@ export default {
         errors.push("Informe o ano de Lançamento.");
       return errors;
     },
-    QuantiError() {
+    AmountError() {
       const errors = [];
       if (!this.$v.quantidade.$dirty) return errors;
       !this.$v.quantidade.maxLength && errors.push("O limite é de 4 dígitos.");
@@ -231,7 +224,7 @@ export default {
   },
   mounted() {
     this.fetchBooks();
-    this.fetchEdits();
+    this.fetchPubli();
   },
   methods: {
     // search
@@ -254,9 +247,9 @@ export default {
           console.error("Erro na busca de livros", error);
         });
     },
-    fetchEdits() {
-      Editora.list().then((response) => {
-        this.listEdits = response.data;
+    fetchPubli() {
+      Publisher.list().then((response) => {
+        this.listPublishers = response.data;
       });
     },
     // Abrir o modal para adicionar
@@ -272,20 +265,20 @@ export default {
       this.quantidade = "";
     },
     // Abrir o modal para editar
-    openModalEdit(livro) {
+    openModalEdit(book) {
       this.ModalTitle = "Editar livro";
       this.dialog = true;
       this.$v.$reset();
 
-      const selectedEdit = this.listEdits.find(
-        (editora) => editora.nome === livro.editora.nome
+      const selectedPubli = this.listPublishers.find(
+        (editora) => editora.nome === book.editora.nome
       );
-      this.selectedLivroId = livro.id;
-      this.nome = livro.nome;
-      this.autor = livro.autor;
-      this.editora = selectedEdit;
-      this.lancamento = livro.lancamento;
-      this.quantidade = livro.quantidade;
+      this.bookId = book.id;
+      this.nome = book.nome;
+      this.autor = book.autor;
+      this.editora = selectedPubli;
+      this.lancamento = book.lancamento;
+      this.quantidade = book.quantidade;
     },
     // Fechar modal
     closeModal() {
@@ -297,20 +290,20 @@ export default {
       if (!this.$v.$error) {
         // Identifica qual modal foi ativado (Add)
         if (this.ModalTitle === "Adicionar Livro") {
-          const selectedEdit = this.listEdits.find(
+          const selectedPubli = this.listPublishers.find(
             (editora) => editora.nome === this.editora
           );
-          const novoLivro = {
+          const newbook = {
             nome: this.nome,
             autor: this.autor,
-            editora: selectedEdit,
+            editora: selectedPubli,
             lancamento: this.lancamento,
             quantidade: this.quantidade,
             totalalugado: "0",
           };
-          Livro.create(novoLivro)
+          Livro.create(newbook)
             .then((response) => {
-              this.books.push({ id: response.data.id, ...novoLivro });
+              this.books.push({ id: response.data.id, ...newbook });
               Swal.fire({
                 icon: "success",
                 title: "Livro adicionado com êxito!",
@@ -333,24 +326,24 @@ export default {
         }
         // Caso contrário, edita
         else {
-          const selectedEdit = this.listEdits.find(
-            (editora) => editora.nome === this.editora
+          const selectedPubli = this.listPublishers.find(
+            (publisher) => publisher.nome === this.publisher
           );
-          const livroEditado = {
-            id: this.selectedLivroId,
+          const editedbook = {
+            id: this.bookId,
             nome: this.nome,
             autor: this.autor,
-            editora: selectedEdit ? { ...selectedEdit } : this.editora,
+            editora: selectedPubli ? { ...selectedPubli } : this.editora,
             lancamento: this.lancamento,
             quantidade: this.quantidade,
           };
-          Livro.update(livroEditado)
+          Livro.update(editedbook)
             .then(() => {
-              this.books = this.books.map((livro) => {
-                if (this.selectedLivroId === livroEditado.id) {
-                  return livroEditado;
+              this.books = this.books.map((book) => {
+                if (this.bookId === editedbook.id) {
+                  return editedbook;
                 } else {
-                  return livro;
+                  return book;
                 }
               });
               Swal.fire({
@@ -376,27 +369,27 @@ export default {
       }
     },
     // Excluir
-    openModalDelete(livro) {
-      this.selectedLivroId = livro.id;
-      this.nome = livro.nome;
-      this.autor = livro.autor;
-      this.editora = livro.editora;
-      this.lancamento = livro.lancamento;
-      this.quantidade = livro.quantidade;
+    openModalDelete(book) {
+      this.bookId = book.id;
+      this.nome = book.nome;
+      this.autor = book.autor;
+      this.editora = book.editora;
+      this.lancamento = book.lancamento;
+      this.quantidade = book.quantidade;
       this.dialogDelete = true;
     },
     closeModalDelete() {
       this.dialogDelete = false;
     },
     confirmDelete() {
-      const deleteLivro = {
-        id: this.selectedLivroId,
+      const deletedbook = {
+        id: this.bookId,
         nome: this.nome,
         autor: this.autor,
         editora: this.editora,
         lancamento: this.lancamento,
       };
-      Livro.delete(deleteLivro)
+      Livro.delete(deletedbook)
         .then((response) => {
           if (response.status === 200) {
             Swal.fire({
@@ -405,7 +398,7 @@ export default {
               showConfirmButton: false,
               timer: 3500,
             });
-            this.removerLivroDaLista(deleteLivro.id);
+            this.removerLivroDaLista(deletedbook.id);
             this.closeModalDelete();
           }
         })
@@ -421,8 +414,8 @@ export default {
           this.closeModalDelete();
         });
     },
-    removerLivroDaLista(livroId) {
-      this.books = this.books.filter((livro) => livro.id !== livroId);
+    removerLivroDaLista(bookId) {
+      this.books = this.books.filter((book) => book.id !== bookId);
     },
   },
 };

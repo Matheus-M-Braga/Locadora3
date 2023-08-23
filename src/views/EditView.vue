@@ -15,7 +15,7 @@
         <v-data-table
           dark
           :headers="headers"
-          :items="editoras"
+          :items="publishers"
           :items-per-page="5"
           class="elevation-1"
           item-key="id"
@@ -24,7 +24,7 @@
           :no-results-text="noDataText"
           :footer-props="{
             'items-per-page-text': 'Registros por página',
-            'items-per-page-options': [5, 10, 15, this.editoras.length],
+            'items-per-page-options': [5, 10, 15, this.publishers.length],
           }"
         >
           <template v-slot:[`item.acoes`]="{ item }">
@@ -53,10 +53,9 @@
                 <v-col cols="12">
                   <v-text-field
                     v-model="nome"
-                    :counter="30"
                     label="Nome"
                     required
-                    :error-messages="NomeError"
+                    :error-messages="NameError"
                     @input="$v.nome.$touch()"
                     @blur="$v.nome.$touch()"
                   ></v-text-field>
@@ -64,10 +63,9 @@
                 <v-col cols="12">
                   <v-text-field
                     v-model="cidade"
-                    :counter="30"
                     label="Cidade"
                     required
-                    :error-messages="CidadeError"
+                    :error-messages="CityError"
                     @input="$v.cidade.$touch()"
                     @blur="$v.cidade.$touch()"
                   ></v-text-field>
@@ -115,17 +113,17 @@
 </template>
 
 <script>
-import Editora from "@/services/edit";
+import Publisher from "@/services/edit";
 import Swal from "sweetalert2";
 import { validationMixin } from "vuelidate";
-import { required, maxLength } from "vuelidate/lib/validators";
+import { required } from "vuelidate/lib/validators";
 
 export default {
   mixins: [validationMixin],
 
   validations: {
-    nome: { required, maxLength: maxLength(30) },
-    cidade: { required, maxLength: maxLength(30) },
+    nome: { required },
+    cidade: { required },
   },
   data() {
     return {
@@ -138,30 +136,28 @@ export default {
         { text: "Cidade", value: "cidade" },
         { text: "Ações", value: "acoes", sortable: false },
       ],
-      editoras: [],
+      publishers: [],
       nome: "",
       cidade: "",
       dialog: false,
       dialogDelete: false,
-      selectedEditoraId: null,
+      publisherId: null,
     };
   },
   mounted() {
-    this.fetchEdits();
+    this.fetchPubli();
   },
   computed: {
     // validacao
-    NomeError() {
+    NameError() {
       const errors = [];
       if (!this.$v.nome.$dirty) return errors;
-      !this.$v.nome.maxLength && errors.push("O limite é de 30 caracteres.");
       !this.$v.nome.required && errors.push("Informe o nome.");
       return errors;
     },
-    CidadeError() {
+    CityError() {
       const errors = [];
       if (!this.$v.cidade.$dirty) return errors;
-      !this.$v.cidade.maxLength && errors.push("O limite é de 30 caracteres.");
       !this.$v.cidade.required && errors.push("Informe a cidade.");
       return errors;
     },
@@ -177,10 +173,10 @@ export default {
       );
     },
     // Listar
-    fetchEdits() {
-      Editora.list()
+    fetchPubli() {
+      Publisher.list()
         .then((response) => {
-          this.editoras = response.data;
+          this.publishers = response.data;
         })
         .catch((error) => {
           console.error("Erro ao buscar editoras:", error);
@@ -196,14 +192,14 @@ export default {
       this.cidade = "";
     },
     // Abrir o modal para editar
-    openModalEdit(editora) {
+    openModalEdit(publisher) {
       this.ModalTitle = "Editar Editora";
       this.dialog = true;
       this.$v.$reset();
 
-      this.selectedEditoraId = editora.id;
-      this.nome = editora.nome;
-      this.cidade = editora.cidade;
+      this.publisherId = publisher.id;
+      this.nome = publisher.nome;
+      this.cidade = publisher.cidade;
     },
     //  Fechar modal
     closeModal() {
@@ -214,13 +210,13 @@ export default {
       if (!this.$v.$error) {
         // Identifica qual modal foi ativado (Add)
         if (this.ModalTitle === "Adicionar Editora") {
-          const novaEditora = {
+          const newpublisher = {
             nome: this.nome,
             cidade: this.cidade,
           };
-          Editora.create(novaEditora)
+          Publisher.create(newpublisher)
             .then((response) => {
-              this.editoras.push({ id: response.data.id, ...novaEditora });
+              this.publishers.push({ id: response.data.id, ...newpublisher });
               Swal.fire({
                 icon: "success",
                 title: "Editora adicionada com êxito!",
@@ -242,18 +238,18 @@ export default {
         }
         // Caso contrário, edita =)
         else {
-          const editoraEditada = {
-            id: this.selectedEditoraId,
+          const editedpublisher = {
+            id: this.publisherId,
             nome: this.nome,
             cidade: this.cidade,
           };
-          Editora.update(editoraEditada)
+          Publisher.update(editedpublisher)
             .then(() => {
-              this.editoras = this.editoras.map((editora) => {
-                if (editora.id === editoraEditada.id) {
-                  return editoraEditada;
+              this.publishers = this.publishers.map((publisher) => {
+                if (publisher.id === editedpublisher.id) {
+                  return editedpublisher;
                 } else {
-                  return editora;
+                  return publisher;
                 }
               });
               Swal.fire({
@@ -278,22 +274,22 @@ export default {
       }
     },
     // Excluir
-    openModalDelete(editora) {
-      this.selectedEditoraId = editora.id;
-      this.nome = editora.nome;
-      this.cidade = editora.cidade;
+    openModalDelete(publisher) {
+      this.publisherId = publisher.id;
+      this.nome = publisher.nome;
+      this.cidade = publisher.cidade;
       this.dialogDelete = true;
     },
     closeModalDelete() {
       this.dialogDelete = false;
     },
     confirmDelete() {
-      const deleteEditora = {
-        id: this.selectedEditoraId,
+      const deletedpublisher = {
+        id: this.publisherId,
         nome: this.nome,
         cidade: this.cidade,
       };
-      Editora.delete(deleteEditora)
+      Publisher.delete(deletedpublisher)
         .then((response) => {
           if (response.status === 200) {
             Swal.fire({
@@ -302,7 +298,7 @@ export default {
               showConfirmButton: false,
               timer: 3500,
             });
-            this.removerEditoraDaLista(deleteEditora.id);
+            this.removeFromList(deletedpublisher.id);
           } else {
             Swal.fire({
               icon: "error",
@@ -325,9 +321,9 @@ export default {
         });
       this.dialogDelete = false;
     },
-    removerEditoraDaLista(editoraId) {
-      this.editoras = this.editoras.filter(
-        (editora) => editora.id !== editoraId
+    removeFromList(publisherId) {
+      this.publishers = this.publishers.filter(
+        (publisher) => publisher.id !== publisherId
       );
     },
   },

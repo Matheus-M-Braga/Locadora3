@@ -53,10 +53,9 @@
                 <v-col cols="12">
                   <v-text-field
                     v-model="nome"
-                    :counter="30"
                     label="Nome"
                     required
-                    :error-messages="NomeError"
+                    :error-messages="NameError"
                     @input="$v.nome.$touch()"
                     @blur="$v.nome.$touch()"
                   ></v-text-field>
@@ -64,10 +63,9 @@
                 <v-col cols="12">
                   <v-text-field
                     v-model="cidade"
-                    :counter="30"
                     label="Cidade"
                     required
-                    :error-messages="CidadeError"
+                    :error-messages="CityError"
                     @input="$v.cidade.$touch()"
                     @blur="$v.cidade.$touch()"
                   ></v-text-field>
@@ -75,10 +73,9 @@
                 <v-col cols="12">
                   <v-text-field
                     v-model="endereco"
-                    :counter="30"
                     label="Endereço"
                     required
-                    :error-messages="EnderecoError"
+                    :error-messages="AddressError"
                     @input="$v.endereco.$touch()"
                     @blur="$v.endereco.$touch()"
                   ></v-text-field>
@@ -138,7 +135,7 @@
 </template>
 
 <script>
-import Usuario from "@/services/users";
+import User from "@/services/users";
 import Swal from "sweetalert2";
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
@@ -147,9 +144,9 @@ export default {
   mixins: [validationMixin],
 
   validations: {
-    nome: { required, maxLength: maxLength(30) },
-    endereco: { required, maxLength: maxLength(30) },
-    cidade: { required, maxLength: maxLength(30) },
+    nome: { required },
+    endereco: { required },
+    cidade: { required },
     email: { required, email, maxLength: maxLength(50) },
   },
   data() {
@@ -181,25 +178,21 @@ export default {
   },
   computed: {
     // validacao
-    NomeError() {
+    NameError() {
       const errors = [];
       if (!this.$v.nome.$dirty) return errors;
-      !this.$v.nome.maxLength && errors.push("O limite é de 30 caracteres.");
       !this.$v.nome.required && errors.push("Informe o nome.");
       return errors;
     },
-    EnderecoError() {
+    AddressError() {
       const errors = [];
       if (!this.$v.endereco.$dirty) return errors;
-      !this.$v.endereco.maxLength &&
-        errors.push("O limite é de 30 caracteres.");
       !this.$v.endereco.required && errors.push("Informe o endereco.");
       return errors;
     },
-    CidadeError() {
+    CityError() {
       const errors = [];
       if (!this.$v.cidade.$dirty) return errors;
-      !this.$v.cidade.maxLength && errors.push("O limite é de 30 caracteres.");
       !this.$v.cidade.required && errors.push("Informe a cidade.");
       return errors;
     },
@@ -227,7 +220,7 @@ export default {
     },
     // Listar
     fetchUsers() {
-      Usuario.list()
+      User.list()
         .then((response) => {
           this.users = response.data;
         })
@@ -257,16 +250,16 @@ export default {
       this.email = "";
     },
     // Abrir o modal para editar
-    openModalEdit(usuario) {
+    openModalEdit(user) {
       this.ModalTitle = "Editar Usuário";
       this.dialog = true;
       this.$v.$reset();
 
-      this.userId = usuario.id;
-      this.nome = usuario.nome;
-      this.endereco = usuario.endereco;
-      this.cidade = usuario.cidade;
-      this.email = usuario.email;
+      this.userId = user.id;
+      this.nome = user.nome;
+      this.endereco = user.endereco;
+      this.cidade = user.cidade;
+      this.email = user.email;
     },
     // Fechar modal
     closeModal() {
@@ -279,15 +272,15 @@ export default {
         if (!this.$v.$error) {
           // Identica qual modal foi ativado (Add)
           if (this.ModalTitle === "Adicionar Usuário") {
-            const novoUsuario = {
+            const newuser = {
               nome: this.nome,
               endereco: this.endereco,
               cidade: this.cidade,
               email: this.email,
             };
-            Usuario.create(novoUsuario)
+            User.create(newuser)
               .then((response) => {
-                this.users.push({ id: response.data.id, ...novoUsuario });
+                this.users.push({ id: response.data.id, ...newuser });
                 Swal.fire({
                   icon: "success",
                   title: "Usuário adicionado com êxito!",
@@ -309,20 +302,20 @@ export default {
           }
           // Caso contrário, edita
           else {
-            const usuarioEditado = {
+            const editeduser = {
               id: this.userId,
               nome: this.nome,
               endereco: this.endereco,
               cidade: this.cidade,
               email: this.email,
             };
-            Usuario.update(usuarioEditado)
+            User.update(editeduser)
               .then(() => {
-                this.users = this.users.map((usuario) => {
-                  if (usuario.id === usuarioEditado.id) {
-                    return usuarioEditado;
+                this.users = this.users.map((user) => {
+                  if (user.id === editeduser.id) {
+                    return editeduser;
                   } else {
-                    return usuario;
+                    return user;
                   }
                 });
                 this.dialogEdit = false;
@@ -350,26 +343,26 @@ export default {
       }
     },
     // Excluir
-    openModalDelete(usuario) {
-      this.userId = usuario.id;
-      this.nome = usuario.nome;
-      this.endereco = usuario.endereco;
-      this.cidade = usuario.cidade;
-      this.email = usuario.email;
+    openModalDelete(user) {
+      this.userId = user.id;
+      this.nome = user.nome;
+      this.endereco = user.endereco;
+      this.cidade = user.cidade;
+      this.email = user.email;
       this.dialogDelete = true;
     },
     closeModalDelete() {
       this.dialogDelete = false;
     },
     confirmDelete() {
-      const deleteUsuario = {
+      const deleteduser = {
         id: this.userId,
         nome: this.nome,
         endereco: this.endereco,
         cidade: this.cidade,
         email: this.email,
       };
-      Usuario.delete(deleteUsuario)
+      User.delete(deleteduser)
         .then((response) => {
           if (response.status === 200) {
             Swal.fire({
@@ -378,7 +371,7 @@ export default {
               showConfirmButton: false,
               timer: 3500,
             });
-            this.removerUsuarioDaLista(deleteUsuario.id);
+            this.removerUsuarioDaLista(deleteduser.id);
             this.dialogDelete = false;
           } else {
             Swal.fire({
@@ -401,8 +394,8 @@ export default {
           this.closeModalDelete();
         });
     },
-    removerUsuarioDaLista(usuarioId) {
-      this.users = this.users.filter((usuario) => usuario.id !== usuarioId);
+    removerUsuarioDaLista(userId) {
+      this.users = this.users.filter((user) => user.id !== userId);
     },
   },
 };

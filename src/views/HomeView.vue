@@ -24,9 +24,9 @@
               <v-list-item-content>
                 <div class="title">Último livro alugado</div>
                 <br /><br /><br />
-                <v-list-item-title class="mb-1">{{
-                  ultimoAlug
-                }}</v-list-item-title>
+                <v-list-item-title class="mb-1">
+                  {{ lastRented }}
+                </v-list-item-title>
                 <div><v-divider></v-divider></div>
               </v-list-item-content>
             </v-list-item>
@@ -49,15 +49,15 @@
               <v-list-item-content>
                 <div class="title">Livros disponíveis</div>
                 <br /><br /><br />
-                <v-list-item-title class="mb-1">{{
-                  totalDisp
-                }}</v-list-item-title>
+                <v-list-item-title class="mb-1">
+                  {{ availableBooks }}
+                </v-list-item-title>
                 <div><v-divider></v-divider></div>
               </v-list-item-content>
             </v-list-item>
           </v-card>
         </v-flex>
-        <!-- todos os livros no total -->
+        <!-- livros alugados -->
         <v-flex sm6 xs12 md6 lg4>
           <v-card class="ma-3" dark>
             <v-list-item>
@@ -68,20 +68,21 @@
                   height="80"
                   elevation="10"
                 >
-                  <v-icon dark large>mdi-book-multiple</v-icon>
+                  <v-icon dark large>mdi-book-open-variant</v-icon>
                 </v-sheet>
               </v-list-item-avatar>
               <v-list-item-content>
                 <div class="title">Livros alugados</div>
                 <br /><br /><br />
-                <v-list-item-title class="mb-1">{{
-                  this.renteds
-                }}</v-list-item-title>
+                <v-list-item-title class="mb-1">
+                  {{ this.rented }}
+                </v-list-item-title>
                 <div><v-divider></v-divider></div>
               </v-list-item-content>
             </v-list-item>
           </v-card>
         </v-flex>
+        <!-- Total de aluguéis -->
         <v-flex sm6 xs12 md6 lg4>
           <v-card class="ma-3" dark>
             <v-list-item>
@@ -92,20 +93,21 @@
                   height="80"
                   elevation="10"
                 >
-                  <v-icon dark large>mdi-book-multiple</v-icon>
+                  <v-icon dark large>mdi-book-account</v-icon>
                 </v-sheet>
               </v-list-item-avatar>
               <v-list-item-content>
                 <div class="title">Total de Aluguéis</div>
                 <br /><br /><br />
-                <v-list-item-title class="mb-1">{{
-                  this.alugs.length
-                }}</v-list-item-title>
+                <v-list-item-title class="mb-1">
+                  {{ this.rentals.length }}
+                </v-list-item-title>
                 <div><v-divider></v-divider></div>
               </v-list-item-content>
             </v-list-item>
           </v-card>
         </v-flex>
+        <!-- Usuários -->
         <v-flex sm6 xs12 md6 lg4>
           <v-card class="ma-3" dark>
             <v-list-item>
@@ -116,20 +118,21 @@
                   height="80"
                   elevation="10"
                 >
-                  <v-icon dark large>mdi-book-multiple</v-icon>
+                  <v-icon dark large>mdi-account</v-icon>
                 </v-sheet>
               </v-list-item-avatar>
               <v-list-item-content>
                 <div class="title">Usuários cadastrados</div>
                 <br /><br /><br />
-                <v-list-item-title class="mb-1">{{
-                  this.users
-                }}</v-list-item-title>
+                <v-list-item-title class="mb-1">
+                  {{ this.users }}
+                </v-list-item-title>
                 <div><v-divider></v-divider></div>
               </v-list-item-content>
             </v-list-item>
           </v-card>
         </v-flex>
+        <!-- Editoras -->
         <v-flex sm6 xs12 md6 lg4>
           <v-card class="ma-3" dark>
             <v-list-item>
@@ -140,15 +143,15 @@
                   height="80"
                   elevation="10"
                 >
-                  <v-icon dark large>mdi-book-multiple</v-icon>
+                  <v-icon dark large>mdi-pencil</v-icon>
                 </v-sheet>
               </v-list-item-avatar>
               <v-list-item-content>
                 <div class="title">Editoras cadastradas</div>
                 <br /><br /><br />
-                <v-list-item-title class="mb-1">{{
-                  this.publis
-                }}</v-list-item-title>
+                <v-list-item-title class="mb-1">
+                  {{ this.publis }}
+                </v-list-item-title>
                 <div><v-divider></v-divider></div>
               </v-list-item-content>
             </v-list-item>
@@ -163,23 +166,21 @@
 import LineChart from "@/components/LineChart";
 import PieChart from "@/components/PieChart";
 import User from "@/services/users";
-import Livro from "@/services/book";
+import Book from "@/services/book";
 import Publi from "@/services/edit";
-import Aluguel from "@/services/alug";
+import Rental from "@/services/alug";
 export default {
   data: () => ({
     books: [],
-    totalDisp: 0,
-    renteds: 0,
+    availableBooks: 0,
+    rented: 0,
     users: 0,
     publis: 0,
     Listusers: [],
     Listpublis: [],
-    DispId: {},
     total: 0,
-    alugs: [],
-    maisalugados: [],
-    ultimoAlug: "",
+    rentals: [],
+    lastRented: "",
   }),
   mounted() {
     this.fetchBooks();
@@ -193,7 +194,7 @@ export default {
   methods: {
     // listar livros
     fetchBooks() {
-      Livro.list()
+      Book.list()
         .then((response) => {
           this.books = response.data;
           this.CalcDisp();
@@ -204,9 +205,9 @@ export default {
     },
     // Listar alugueis
     fetchAlugs() {
-      Aluguel.list()
+      Rental.list()
         .then((response) => {
-          this.alugs = response.data;
+          this.rentals = response.data;
           this.CalcAlug();
           this.totalCalc();
         })
@@ -227,33 +228,23 @@ export default {
     // Livros
     CalcDisp() {
       // Total disponível
-      this.totalDisp = this.books.reduce(
+      this.availableBooks = this.books.reduce(
         (total, book) => total + book.quantidade,
         0
       );
-
-      // Quantidade dos livros disponíveis
-      this.books.forEach((book) => {
-        this.$set(this.DispId, book.nome, book.quantidade);
-      });
-
-      // Ordena os livros de acordo com a disponibilidade
-      this.books.sort((a, b) => b.quantidade - a.quantidade);
     },
     totalCalc() {
       // filtra so os alugueis que nao estão devolvidos
-      const filtereds = this.alugs.filter((alug) => !alug.data_devolucao);
-      // armazena o total de livros
-      this.total = this.totalDisp + filtereds.length;
-      this.renteds = filtereds.length;
+      const filtereds = this.rentals.filter((rental) => !rental.data_devolucao);
+      this.rented = filtereds.length;
     },
     // Aluguéis
     CalcAlug() {
       // Último alugado
-      const ultimo = this.alugs.reduce((prev, current) => {
+      const last = this.rentals.reduce((prev, current) => {
         return prev.id < current.id ? current : prev;
       });
-      this.ultimoAlug = ultimo.livro_id.nome;
+      this.lastRented = last.livro_id.nome;
     },
   },
 };

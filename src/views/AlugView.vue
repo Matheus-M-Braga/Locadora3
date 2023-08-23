@@ -29,7 +29,7 @@
           <template v-slot:[`item.status`]="{ item }">
             <td>
               <v-chip :class="statusClass(item)" class="black--text">
-              {{ item.status }}
+                {{ item.status }}
               </v-chip>
             </td>
           </template>
@@ -166,21 +166,21 @@
 </template>
 
 <script>
-import Aluguel from "@/services/alug";
-import Livro from "@/services/book";
-import Usuario from "@/services/users";
+import Rental from "@/services/alug";
+import Book from "@/services/book";
+import User from "@/services/users";
 import Swal from "sweetalert2";
 // import { isValid, parseISO } from 'date-fns';
 import { validationMixin } from "vuelidate";
-import { required, maxLength } from "vuelidate/lib/validators";
+import { required } from "vuelidate/lib/validators";
 export default {
   mixins: [validationMixin],
 
   validations: {
-    livro_id: { required, maxLength: maxLength(30) },
-    usuario_id: { required, maxLength: maxLength(30) },
-    data_aluguel: { required, maxLength: maxLength(30) },
-    data_previsao: { required, maxLength: maxLength(30) },
+    livro_id: { required },
+    usuario_id: { required },
+    data_aluguel: { required },
+    data_previsao: { required },
   },
   data() {
     return {
@@ -219,24 +219,18 @@ export default {
     BookError() {
       const errors = [];
       if (!this.$v.livro_id.$dirty) return errors;
-      !this.$v.livro_id.maxLength &&
-        errors.push("O limite é de 30 caracteres.");
       !this.$v.livro_id.required && errors.push("Informe o livro.");
       return errors;
     },
     UserError() {
       const errors = [];
       if (!this.$v.usuario_id.$dirty) return errors;
-      !this.$v.usuario_id.maxLength &&
-        errors.push("O limite é de 30 caracteres.");
       !this.$v.usuario_id.required && errors.push("Informe o usuário.");
       return errors;
     },
     AlugError() {
       const errors = [];
       if (!this.$v.data_aluguel.$dirty) return errors;
-      !this.$v.data_aluguel.maxLength &&
-        errors.push("O limite é de 30 caracteres.");
       !this.$v.data_aluguel.required &&
         errors.push("Informe a data do aluguel.");
       return errors;
@@ -244,8 +238,6 @@ export default {
     DevolError() {
       const errors = [];
       if (!this.$v.data_previsao.$dirty) return errors;
-      !this.$v.data_previsao.maxLength &&
-        errors.push("O limite é de 30 caracteres.");
       !this.$v.data_previsao.required &&
         errors.push("Informe a previsão de devolução.");
       return errors;
@@ -310,7 +302,7 @@ export default {
     async fetchAlugs() {
       try {
         const [booksResponse, rentalsResponse, usersResponse] =
-          await Promise.all([Livro.list(), Aluguel.list(), Usuario.list()]);
+          await Promise.all([Book.list(), Rental.list(), User.list()]);
 
         this.listBooks = booksResponse.data.map((livro) => ({
           id: livro.id,
@@ -400,7 +392,7 @@ export default {
             data_previsao: this.data_previsao,
             status: "Pendente",
           };
-          Aluguel.create(novoAlug)
+          Rental.create(novoAlug)
             .then((response) => {
               this.alugs.push({ id: response.data.id, ...novoAlug });
 
@@ -449,7 +441,7 @@ export default {
         data_previsao: this.data_previsao,
         data_devolucao: this.data_devolucao,
       };
-      Aluguel.delete(deleteAlug)
+      Rental.delete(deleteAlug)
         .then((response) => {
           if (response.status === 200 && !deleteAlug.data_devolucao) {
             Swal.fire({
@@ -523,7 +515,7 @@ export default {
         data_devolucao: new Date().toISOString().substr(0, 10),
         status: "Devolvido",
       };
-      Aluguel.update(AlugDevolvido)
+      Rental.update(AlugDevolvido)
         .then(() => {
           this.alugs = this.alugs.map((aluguel) => {
             if (this.selectedALugId === AlugDevolvido.id) {
