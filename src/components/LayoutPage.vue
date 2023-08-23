@@ -48,10 +48,6 @@
         <v-btn href="/"><v-icon>mdi-bookshelf</v-icon> WDA LIVRARIA</v-btn>
       </div>
       <v-spacer></v-spacer>
-      <v-btn href="/" text>
-        <span class="mr-2">Sair</span>
-        <v-icon>mdi-logout</v-icon>
-      </v-btn>
     </v-app-bar>
     <v-main>
       <slot></slot>
@@ -64,10 +60,10 @@ export default {
     return {
       links: [
         { icon: "mdi-widgets", text: "Dashboard", route: "/" },
-        { icon: "mdi-account", text: "Usuário", route: "/user" },
-        { icon: "mdi-book", text: "Livro", route: "/book" },
-        { icon: "mdi-pencil", text: "Editora", route: "/edit" },
-        { icon: "mdi-book-account", text: "Aluguel", route: "/alug" },
+        { icon: "mdi-account", text: "Usuário", route: "/usuario" },
+        { icon: "mdi-book", text: "Livro", route: "/livro" },
+        { icon: "mdi-pencil", text: "Editora", route: "/editora" },
+        { icon: "mdi-book-account", text: "Aluguel", route: "/aluguel" },
       ],
     };
   },

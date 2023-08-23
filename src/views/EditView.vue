@@ -56,7 +56,7 @@
                     label="Nome"
                     required
                     :error-messages="NameError"
-                    @input="$v.nome.$touch()"
+                    @input="validateName()"
                     @blur="$v.nome.$touch()"
                   ></v-text-field>
                 </v-col>
@@ -142,6 +142,7 @@ export default {
       dialog: false,
       dialogDelete: false,
       publisherId: null,
+      nameExists: false,
     };
   },
   mounted() {
@@ -153,6 +154,9 @@ export default {
       const errors = [];
       if (!this.$v.nome.$dirty) return errors;
       !this.$v.nome.required && errors.push("Informe o nome.");
+      if (this.nameExists) {
+        errors.push("Editora já cadastrada!");
+      }
       return errors;
     },
     CityError() {
@@ -182,6 +186,15 @@ export default {
           console.error("Erro ao buscar editoras:", error);
         });
     },
+    CheckNames() {
+      return this.publishers.some((publisher) => publisher.nome == this.nome);
+    },
+    validateName() {
+      this.nameExists = this.CheckNames(this.nome);
+      if (this.nameExists) {
+        this.$v.nome.$touch();
+      }
+    },
     // Abrir modal para adicionar
     openModalCreate() {
       this.ModalTitle = "Adicionar Editora";
@@ -206,70 +219,72 @@ export default {
       this.dialog = false;
     },
     confirm() {
-      this.$v.$touch();
-      if (!this.$v.$error) {
-        // Identifica qual modal foi ativado (Add)
-        if (this.ModalTitle === "Adicionar Editora") {
-          const newpublisher = {
-            nome: this.nome,
-            cidade: this.cidade,
-          };
-          Publisher.create(newpublisher)
-            .then((response) => {
-              this.publishers.push({ id: response.data.id, ...newpublisher });
-              Swal.fire({
-                icon: "success",
-                title: "Editora adicionada com êxito!",
-                showConfirmButton: false,
-                timer: 3500,
+      if (!this.nameExists) {
+        this.$v.$touch();
+        if (!this.$v.$error) {
+          // Identifica qual modal foi ativado (Add)
+          if (this.ModalTitle === "Adicionar Editora") {
+            const newpublisher = {
+              nome: this.nome,
+              cidade: this.cidade,
+            };
+            Publisher.create(newpublisher)
+              .then((response) => {
+                this.publishers.push({ id: response.data.id, ...newpublisher });
+                Swal.fire({
+                  icon: "success",
+                  title: "Editora adicionada com êxito!",
+                  showConfirmButton: false,
+                  timer: 3500,
+                });
+                this.closeModal();
+              })
+              .catch((error) => {
+                console.error("Erro ao adicionar editora:", error);
+                Swal.fire({
+                  icon: "error",
+                  title: "Erro ao adicionar editora.",
+                  text: error.response.data.error,
+                  showConfirmButton: false,
+                  timer: 3500,
+                });
               });
-              this.closeModal();
-            })
-            .catch((error) => {
-              console.error("Erro ao adicionar editora:", error);
-              Swal.fire({
-                icon: "error",
-                title: "Erro ao adicionar editora.",
-                text: error.response.data.error,
-                showConfirmButton: false,
-                timer: 3500,
+          }
+          // Caso contrário, edita =)
+          else {
+            const editedpublisher = {
+              id: this.publisherId,
+              nome: this.nome,
+              cidade: this.cidade,
+            };
+            Publisher.update(editedpublisher)
+              .then(() => {
+                this.publishers = this.publishers.map((publisher) => {
+                  if (publisher.id === editedpublisher.id) {
+                    return editedpublisher;
+                  } else {
+                    return publisher;
+                  }
+                });
+                Swal.fire({
+                  icon: "success",
+                  title: "Editora atualizada com êxito!",
+                  showConfirmButton: false,
+                  timer: 3500,
+                });
+                this.closeModal();
+              })
+              .catch((error) => {
+                console.error("Erro ao atualizar editora:", error);
+                Swal.fire({
+                  icon: "error",
+                  title: "Erro ao atualizar editora.",
+                  text: error.response.data.error,
+                  showConfirmButton: false,
+                  timer: 3500,
+                });
               });
-            });
-        }
-        // Caso contrário, edita =)
-        else {
-          const editedpublisher = {
-            id: this.publisherId,
-            nome: this.nome,
-            cidade: this.cidade,
-          };
-          Publisher.update(editedpublisher)
-            .then(() => {
-              this.publishers = this.publishers.map((publisher) => {
-                if (publisher.id === editedpublisher.id) {
-                  return editedpublisher;
-                } else {
-                  return publisher;
-                }
-              });
-              Swal.fire({
-                icon: "success",
-                title: "Editora atualizada com êxito!",
-                showConfirmButton: false,
-                timer: 3500,
-              });
-              this.closeModal();
-            })
-            .catch((error) => {
-              console.error("Erro ao atualizar editora:", error);
-              Swal.fire({
-                icon: "error",
-                title: "Erro ao atualizar editora.",
-                text: error.response.data.error,
-                showConfirmButton: false,
-                timer: 3500,
-              });
-            });
+          }
         }
       }
     },

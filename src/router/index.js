@@ -5,7 +5,6 @@ import UserView from '../views/UserView.vue'
 import BookView from '../views/BookView.vue'
 import EditView from '../views/EditView.vue'
 import AlugView from '../views/AlugView.vue'
-import Login from '../components/Login.vue'
 
 Vue.use(VueRouter)
 
@@ -16,29 +15,24 @@ const routes = [
     component: HomeView
   },
   {
-    path: '/user',
+    path: '/usuario',
     name: 'user',
     component: UserView
   },
   {
-    path: '/book',
+    path: '/livro',
     name: 'nook',
     component: BookView
   },
   {
-    path: '/edit',
+    path: '/editora',
     name: 'edit',
     component: EditView
   },
   {
-    path: '/alug',
+    path: '/aluguel',
     name: 'alug',
     component: AlugView
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: Login
   },
   // {
   //   path: '/about',

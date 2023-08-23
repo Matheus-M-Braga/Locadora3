@@ -35,10 +35,10 @@
           </template>
           <template v-slot:[`item.acoes`]="{ item }">
             <td>
-              <v-icon class="mr-2" @click="openModalDevol(item)">
+              <v-icon v-if="item.data_devolucao === 'Pendente'" class="mr-2" @click="openModalDevol(item)">
                 mdi-book
               </v-icon>
-              <v-icon class="mr-2" @click="openModalDelete(item)">
+              <v-icon v-if="item.data_devolucao === 'Pendente'" class="" @click="openModalDelete(item)">
                 mdi-delete
               </v-icon>
             </td>
@@ -77,6 +77,7 @@
                   :error-messages="UserError"
                   @input="$v.usuario_id.$touch()"
                   @blur="$v.usuario_id.$touch()"
+                  :filter="filter"
                 ></v-select>
               </v-col>
               <v-col cols="12">
@@ -100,6 +101,8 @@
                   @input="$v.data_previsao.$touch()"
                   @blur="$v.data_previsao.$touch()"
                   type="date"
+                  :min="data_aluguel"
+                  :max="MaxDate()"
                 ></v-text-field>
               </v-col>
             </v-col>
@@ -170,7 +173,6 @@ import Rental from "@/services/alug";
 import Book from "@/services/book";
 import User from "@/services/users";
 import Swal from "sweetalert2";
-// import { isValid, parseISO } from 'date-fns';
 import { validationMixin } from "vuelidate";
 import { required } from "vuelidate/lib/validators";
 export default {
@@ -193,6 +195,7 @@ export default {
         { text: "Usuário", value: "usuario_id" },
         { text: "Data do Aluguel", value: "data_aluguel" },
         { text: "Previsão de Devolução", value: "data_previsao" },
+        { text: "Data de Devolução", value: "data_devolucao" },
         { text: "Status", value: "status" },
         { text: "Ações", value: "acoes", sortable: false },
       ],
@@ -274,6 +277,13 @@ export default {
         }
       }
       return null;
+    },
+    // Calcula a data limite
+    MaxDate() {
+      const today = new Date();
+      const futureDate = new Date(today);
+      futureDate.setDate(today.getDate() + 30);
+      return futureDate.toISOString().substr(0, 10);
     },
     statusClass(item) {
       if (item.status == "Atrasado") {

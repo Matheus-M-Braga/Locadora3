@@ -55,7 +55,7 @@
                   label="Nome"
                   required
                   :error-messages="NameError"
-                  @input="$v.nome.$touch()"
+                  @input="validateName()"
                   @blur="$v.nome.$touch()"
                 ></v-text-field>
               </v-col>
@@ -184,6 +184,7 @@ export default {
       dialog: false,
       dialogDelete: false,
       bookId: null,
+      nameExists: false,
     };
   },
   computed: {
@@ -192,6 +193,9 @@ export default {
       const errors = [];
       if (!this.$v.nome.$dirty) return errors;
       !this.$v.nome.required && errors.push("Informe o nome.");
+      if (this.nameExists) {
+        errors.push("Livro já cadastrado!");
+      }
       return errors;
     },
     AuthorError() {
@@ -252,6 +256,15 @@ export default {
         this.listPublishers = response.data;
       });
     },
+    CheckNames() {
+      return this.books.some((book) => book.nome == this.nome);
+    },
+    validateName() {
+      this.nameExists = this.CheckNames(this.nome);
+      if (this.nameExists) {
+        this.$v.nome.$touch();
+      }
+    },
     // Abrir o modal para adicionar
     openModalCreate() {
       this.ModalTitle = "Adicionar Livro";
@@ -286,85 +299,87 @@ export default {
     },
     // confirm
     confirm() {
-      this.$v.$touch();
-      if (!this.$v.$error) {
-        // Identifica qual modal foi ativado (Add)
-        if (this.ModalTitle === "Adicionar Livro") {
-          const selectedPubli = this.listPublishers.find(
-            (editora) => editora.nome === this.editora
-          );
-          const newbook = {
-            nome: this.nome,
-            autor: this.autor,
-            editora: selectedPubli,
-            lancamento: this.lancamento,
-            quantidade: this.quantidade,
-            totalalugado: "0",
-          };
-          Livro.create(newbook)
-            .then((response) => {
-              this.books.push({ id: response.data.id, ...newbook });
-              Swal.fire({
-                icon: "success",
-                title: "Livro adicionado com êxito!",
-                showConfirmButton: false,
-                timer: 3500,
+      if (!this.nameExists) {
+        this.$v.$touch();
+        if (!this.$v.$error) {
+          // Identifica qual modal foi ativado (Add)
+          if (this.ModalTitle === "Adicionar Livro") {
+            const selectedPubli = this.listPublishers.find(
+              (editora) => editora.nome === this.editora
+            );
+            const newbook = {
+              nome: this.nome,
+              autor: this.autor,
+              editora: selectedPubli,
+              lancamento: this.lancamento,
+              quantidade: this.quantidade,
+              totalalugado: "0",
+            };
+            Livro.create(newbook)
+              .then((response) => {
+                this.books.push({ id: response.data.id, ...newbook });
+                Swal.fire({
+                  icon: "success",
+                  title: "Livro adicionado com êxito!",
+                  showConfirmButton: false,
+                  timer: 3500,
+                });
+                this.closeModal();
+                this.fetchBooks();
+              })
+              .catch((error) => {
+                console.error("Erro ao adicionar o livro:", error);
+                Swal.fire({
+                  icon: "error",
+                  title: "Erro ao adicionar o livro.",
+                  text: error.response.data.error,
+                  showConfirmButton: false,
+                  timer: 3500,
+                });
               });
-              this.closeModal();
-              this.fetchBooks();
-            })
-            .catch((error) => {
-              console.error("Erro ao adicionar o livro:", error);
-              Swal.fire({
-                icon: "error",
-                title: "Erro ao adicionar o livro.",
-                text: error.response.data.error,
-                showConfirmButton: false,
-                timer: 3500,
+          }
+          // Caso contrário, edita
+          else {
+            const selectedPubli = this.listPublishers.find(
+              (publisher) => publisher.nome === this.publisher
+            );
+            const editedbook = {
+              id: this.bookId,
+              nome: this.nome,
+              autor: this.autor,
+              editora: selectedPubli ? { ...selectedPubli } : this.editora,
+              lancamento: this.lancamento,
+              quantidade: this.quantidade,
+            };
+            Livro.update(editedbook)
+              .then(() => {
+                this.books = this.books.map((book) => {
+                  if (this.bookId === editedbook.id) {
+                    return editedbook;
+                  } else {
+                    return book;
+                  }
+                });
+                Swal.fire({
+                  icon: "success",
+                  title: "Livro atualizado com êxito!",
+                  showConfirmButton: false,
+                  timer: 3500,
+                });
+                this.closeModal();
+                this.fetchBooks();
+              })
+              .catch((error) => {
+                console.error("Erro ao atualizar livro:", error);
+                Swal.fire({
+                  icon: "error",
+                  title: "Erro ao atualizar o livro.",
+                  text: error.response.data.error,
+                  showConfirmButton: false,
+                  timer: 3500,
+                });
               });
-            });
-        }
-        // Caso contrário, edita
-        else {
-          const selectedPubli = this.listPublishers.find(
-            (publisher) => publisher.nome === this.publisher
-          );
-          const editedbook = {
-            id: this.bookId,
-            nome: this.nome,
-            autor: this.autor,
-            editora: selectedPubli ? { ...selectedPubli } : this.editora,
-            lancamento: this.lancamento,
-            quantidade: this.quantidade,
-          };
-          Livro.update(editedbook)
-            .then(() => {
-              this.books = this.books.map((book) => {
-                if (this.bookId === editedbook.id) {
-                  return editedbook;
-                } else {
-                  return book;
-                }
-              });
-              Swal.fire({
-                icon: "success",
-                title: "Livro atualizado com êxito!",
-                showConfirmButton: false,
-                timer: 3500,
-              });
-              this.closeModal();
-              this.fetchBooks();
-            })
-            .catch((error) => {
-              console.error("Erro ao atualizar livro:", error);
-              Swal.fire({
-                icon: "error",
-                title: "Erro ao atualizar o livro.",
-                text: error.response.data.error,
-                showConfirmButton: false,
-                timer: 3500,
-              });
-            });
+          }
         }
       }
     },

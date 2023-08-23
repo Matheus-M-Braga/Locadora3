@@ -1,11 +1,6 @@
 <template>
   <div class="container_master">
     <v-container>
-      <!-- graficos -->
-      <v-layout row justify-space-between>
-        <LineChart />
-        <PieChart />
-      </v-layout>
       <v-layout row justify-center>
         <!-- ultimo alugado-->
         <v-flex sm6 xs12 md6 lg4>
@@ -157,6 +152,11 @@
             </v-list-item>
           </v-card>
         </v-flex>
+      </v-layout>
+      <!-- graficos -->
+      <v-layout row justify-space-between>
+        <LineChart />
+        <PieChart />
       </v-layout>
     </v-container>
   </div>
