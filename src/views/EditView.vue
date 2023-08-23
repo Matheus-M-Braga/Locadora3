@@ -7,16 +7,26 @@
           <v-btn dark @click="openModalCreate" width="110">Novo +</v-btn>
         </div>
         <div class="searchbar">
-          <input type="text" v-model="search" placeholder="Pesquisar...">
+          <input type="text" v-model="search" placeholder="Pesquisar..." />
           <v-icon>mdi-magnify</v-icon>
         </div>
       </v-row>
       <v-row wrap class="table">
-        <v-data-table dark :headers="headers" :items="editoras" :items-per-page="5" class="elevation-1" item-key="id"
-          :search="search" :custom-filter="filter" :no-results-text="noDataText" :footer-props="{
+        <v-data-table
+          dark
+          :headers="headers"
+          :items="editoras"
+          :items-per-page="5"
+          class="elevation-1"
+          item-key="id"
+          :search="search"
+          :custom-filter="filter"
+          :no-results-text="noDataText"
+          :footer-props="{
             'items-per-page-text': 'Registros por página',
-            'items-per-page-options': [5, 10, 15, this.editoras.length]
-          }">
+            'items-per-page-options': [5, 10, 15, this.editoras.length],
+          }"
+        >
           <template v-slot:[`item.acoes`]="{ item }">
             <td>
               <v-icon class="mr-2" @click="openModalEdit(item)">
@@ -41,12 +51,26 @@
             <v-card-text>
               <v-col>
                 <v-col cols="12">
-                  <v-text-field v-model="nome" :counter="30" label="Nome" required :error-messages="NomeError"
-                    @input="$v.nome.$touch()" @blur="$v.nome.$touch()"></v-text-field>
+                  <v-text-field
+                    v-model="nome"
+                    :counter="30"
+                    label="Nome"
+                    required
+                    :error-messages="NomeError"
+                    @input="$v.nome.$touch()"
+                    @blur="$v.nome.$touch()"
+                  ></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field v-model="cidade" :counter="30" label="Cidade" required :error-messages="CidadeError"
-                    @input="$v.cidade.$touch()" @blur="$v.cidade.$touch()"></v-text-field>
+                  <v-text-field
+                    v-model="cidade"
+                    :counter="30"
+                    label="Cidade"
+                    required
+                    :error-messages="CidadeError"
+                    @input="$v.cidade.$touch()"
+                    @blur="$v.cidade.$touch()"
+                  ></v-text-field>
                 </v-col>
               </v-col>
               <v-card-actions>
@@ -93,8 +117,8 @@
 <script>
 import Editora from "@/services/edit";
 import Swal from "sweetalert2";
-import { validationMixin } from 'vuelidate'
-import { required, maxLength } from 'vuelidate/lib/validators'
+import { validationMixin } from "vuelidate";
+import { required, maxLength } from "vuelidate/lib/validators";
 
 export default {
   mixins: [validationMixin],
@@ -109,7 +133,7 @@ export default {
       search: "",
       ModalTitle: "",
       headers: [
-        { text: "ID", value: "id", },
+        { text: "ID", value: "id" },
         { text: "Nome", value: "nome" },
         { text: "Cidade", value: "cidade" },
         { text: "Ações", value: "acoes", sortable: false },
@@ -128,27 +152,29 @@ export default {
   computed: {
     // validacao
     NomeError() {
-      const errors = []
-      if (!this.$v.nome.$dirty) return errors
-      !this.$v.nome.maxLength && errors.push('O limite é de 30 caracteres.')
-      !this.$v.nome.required && errors.push('Informe o nome.')
-      return errors
+      const errors = [];
+      if (!this.$v.nome.$dirty) return errors;
+      !this.$v.nome.maxLength && errors.push("O limite é de 30 caracteres.");
+      !this.$v.nome.required && errors.push("Informe o nome.");
+      return errors;
     },
     CidadeError() {
-      const errors = []
-      if (!this.$v.cidade.$dirty) return errors
-      !this.$v.cidade.maxLength && errors.push('O limite é de 30 caracteres.')
-      !this.$v.cidade.required && errors.push('Informe a cidade.')
-      return errors
+      const errors = [];
+      if (!this.$v.cidade.$dirty) return errors;
+      !this.$v.cidade.maxLength && errors.push("O limite é de 30 caracteres.");
+      !this.$v.cidade.required && errors.push("Informe a cidade.");
+      return errors;
     },
   },
   methods: {
     // Search
     filter(value, search) {
-      return value != null &&
+      return (
+        value != null &&
         search != null &&
-        (typeof value === 'string' || typeof value === 'number') &&
-        value.toString().toLowerCase().indexOf(search.toLowerCase()) !== -1;
+        (typeof value === "string" || typeof value === "number") &&
+        value.toString().toLowerCase().indexOf(search.toLowerCase()) !== -1
+      );
     },
     // Listar
     fetchEdits() {
@@ -162,18 +188,18 @@ export default {
     },
     // Abrir modal para adicionar
     openModalCreate() {
-      this.ModalTitle = "Adicionar Editora"
+      this.ModalTitle = "Adicionar Editora";
       this.dialog = true;
-      this.$v.$reset()
+      this.$v.$reset();
 
       this.nome = "";
       this.cidade = "";
     },
     // Abrir o modal para editar
     openModalEdit(editora) {
-      this.ModalTitle = "Editar Editora"
+      this.ModalTitle = "Editar Editora";
       this.dialog = true;
-      this.$v.$reset()
+      this.$v.$reset();
 
       this.selectedEditoraId = editora.id;
       this.nome = editora.nome;
@@ -184,7 +210,7 @@ export default {
       this.dialog = false;
     },
     confirm() {
-      this.$v.$touch()
+      this.$v.$touch();
       if (!this.$v.$error) {
         // Identifica qual modal foi ativado (Add)
         if (this.ModalTitle === "Adicionar Editora") {
@@ -196,8 +222,8 @@ export default {
             .then((response) => {
               this.editoras.push({ id: response.data.id, ...novaEditora });
               Swal.fire({
-                icon: 'success',
-                title: 'Editora adicionada com êxito!',
+                icon: "success",
+                title: "Editora adicionada com êxito!",
                 showConfirmButton: false,
                 timer: 3500,
               });
@@ -206,14 +232,13 @@ export default {
             .catch((error) => {
               console.error("Erro ao adicionar editora:", error);
               Swal.fire({
-                icon: 'error',
-                title: 'Erro ao adicionar editora.',
+                icon: "error",
+                title: "Erro ao adicionar editora.",
                 text: error.response.data.error,
                 showConfirmButton: false,
                 timer: 3500,
-              })
+              });
             });
-
         }
         // Caso contrário, edita =)
         else {
@@ -232,8 +257,8 @@ export default {
                 }
               });
               Swal.fire({
-                icon: 'success',
-                title: 'Editora atualizada com êxito!',
+                icon: "success",
+                title: "Editora atualizada com êxito!",
                 showConfirmButton: false,
                 timer: 3500,
               });
@@ -242,12 +267,12 @@ export default {
             .catch((error) => {
               console.error("Erro ao atualizar editora:", error);
               Swal.fire({
-                icon: 'error',
-                title: 'Erro ao atualizar editora.',
+                icon: "error",
+                title: "Erro ao atualizar editora.",
                 text: error.response.data.error,
                 showConfirmButton: false,
                 timer: 3500,
-              })
+              });
             });
         }
       }
@@ -272,16 +297,16 @@ export default {
         .then((response) => {
           if (response.status === 200) {
             Swal.fire({
-              icon: 'success',
-              title: 'Editora deletada com êxito!',
+              icon: "success",
+              title: "Editora deletada com êxito!",
               showConfirmButton: false,
               timer: 3500,
             });
             this.removerEditoraDaLista(deleteEditora.id);
           } else {
             Swal.fire({
-              icon: 'error',
-              title: 'Erro ao deletar editora.',
+              icon: "error",
+              title: "Erro ao deletar editora.",
               showConfirmButton: false,
               timer: 3500,
             });
@@ -290,18 +315,20 @@ export default {
         .catch((e) => {
           console.error("Erro ao deletar a editora:", e);
           Swal.fire({
-            icon: 'error',
-            title: 'Erro ao deletar editora.',
+            icon: "error",
+            title: "Erro ao deletar editora.",
             text: e.response.data.error,
             showConfirmButton: false,
             timer: 3500,
           });
           this.closeModalDelete();
         });
-      this.dialogDelete = false
+      this.dialogDelete = false;
     },
     removerEditoraDaLista(editoraId) {
-      this.editoras = this.editoras.filter((editora) => editora.id !== editoraId);
+      this.editoras = this.editoras.filter(
+        (editora) => editora.id !== editoraId
+      );
     },
   },
 };
