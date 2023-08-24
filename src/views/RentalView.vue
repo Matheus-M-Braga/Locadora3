@@ -35,10 +35,10 @@
           </template>
           <template v-slot:[`item.acoes`]="{ item }">
             <td>
-              <v-icon class="mr-2" @click="openModalDevol(item)">
+              <v-icon v-if="item.status == 'Pendente'" class="mr-2" @click="openModalDevol(item)">
                 mdi-book
               </v-icon>
-              <v-icon class="" @click="openModalDelete(item)">
+              <v-icon v-if="item.status == 'Pendente'" class="" @click="openModalDelete(item)">
                 mdi-delete
               </v-icon>
             </td>
@@ -133,7 +133,7 @@
             <v-btn color="red darken-1" text @click="closeModalDelete">
               Cancelar
             </v-btn>
-            <v-btn color="green darken-1" text @click="confirmDelete">
+            <v-btn color="green darken-1" text @click="confirmDelete(update)">
               Confirmar
             </v-btn>
           </v-card-actions>
@@ -268,6 +268,7 @@ export default {
       futureDate.setDate(today.getDate() + 30);
       return futureDate.toISOString().substr(0, 10);
     },
+    // Classe do v-chip
     statusClass(item) {
       if (item.status == "Atrasado") {
         return "red";
@@ -416,12 +417,12 @@ export default {
     // Excluir
     openModalDelete(rental) {
       this.update = { ...rental };
-      this.confirmDelete(this.update);
+      this.dialogDelete = true
     },
     closeModalDelete() {
       this.dialogDelete = false;
     },
-    confirmDelete(rental) {
+    confirmDelete(rental) { 
       const selectedBook = this.listBooks.find(
         (book) => book.nome === rental.livro_id
       );
@@ -434,8 +435,10 @@ export default {
         usuario_id: selectedUser,
         data_aluguel: this.parseDate(rental.data_aluguel),
         data_previsao: this.parseDate(rental.data_previsao),
-        data_devolucao: rental.data_devolucao !== "..." ? rental.data_devolucao : null,
+        data_devolucao:
+          rental.data_devolucao !== "..." ? rental.data_devolucao : null,
       };
+      console.log(deleteAlug)
       Rental.delete(deleteAlug)
         .then((response) => {
           if (response.status === 200) {
@@ -474,12 +477,8 @@ export default {
     // Devolução
     openModalDevol(rental) {
       if (rental.data_devolucao == "...") {
-        this.rentalId = rental.id;
-        this.livro_id = rental.livro_id;
-        this.usuario_id = rental.usuario_id;
-        this.data_aluguel = this.parseDate(rental.data_aluguel);
-        this.data_previsao = this.parseDate(rental.data_previsao);
-        this.dialogDevol = true;
+        this.update = { ...rental }
+        this.confirmDevol(this.update)
       } else {
         Swal.fire({
           icon: "error",
@@ -490,20 +489,20 @@ export default {
         this.closeModalDevol();
       }
     },
-    confirmDevol() {
+    confirmDevol(rental) {
       const selectedBook = this.listBooks.find(
-        (livro) => livro.nome === this.livro_id
+        (book) => book.nome === this.livro_id
       );
       const selectedUser = this.listUsers.find(
-        (usuario) => usuario.nome === this.usuario_id
+        (user) => user.nome === this.usuario_id
       );
 
       const returnedRental = {
-        id: this.rentalId,
+        id: rental.id,
         livro_id: selectedBook ? { ...selectedBook } : this.livro_id,
         usuario_id: selectedUser ? { ...selectedUser } : this.usuario_id,
-        data_aluguel: this.data_aluguel,
-        data_previsao: this.data_previsao,
+        data_aluguel: this.parseDate(rental.data_aluguel),
+        data_previsao: this.parseDate(rental.data_devolucao),
         data_devolucao: new Date().toISOString().substr(0, 10),
       };
       Rental.update(returnedRental)

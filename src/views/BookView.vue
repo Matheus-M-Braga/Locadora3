@@ -17,7 +17,7 @@
           :headers="headers"
           :header-props="headerprops"
           :items="books"
-          :items-per-page="5"
+          :items-per-page="7"
           class="elevation-1"
           item-key="id"
           :search="search"
@@ -25,7 +25,7 @@
           :no-results-text="noDataText"
           :footer-props="{
             'items-per-page-text': 'Registros por página',
-            'items-per-page-options': [5, 10, 15, this.books.length],
+            'items-per-page-options': [7, 10, 15, this.books.length],
           }"
         >
           <template v-slot:[`item.acoes`]="{ item }">
