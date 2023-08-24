@@ -35,18 +35,10 @@
           </template>
           <template v-slot:[`item.acoes`]="{ item }">
             <td>
-              <v-icon
-                v-if="item.data_devolucao === 'Pendente'"
-                class="mr-2"
-                @click="openModalDevol(item)"
-              >
+              <v-icon class="mr-2" @click="openModalDevol(item)">
                 mdi-book
               </v-icon>
-              <v-icon
-                v-if="item.data_devolucao === 'Pendente'"
-                class=""
-                @click="openModalDelete(item)"
-              >
+              <v-icon class="" @click="openModalDelete(item)">
                 mdi-delete
               </v-icon>
             </td>
@@ -299,6 +291,13 @@ export default {
       };
       return localDate.toLocaleDateString("pt-BR", options);
     },
+    // Converter para o padrão da API
+    parseDate(date) {
+      if (!date) return null;
+
+      const [day, month, year] = date.split("/");
+      return `${year}-${month}-${day}`;
+    },
     // Listar
     async fetchAlugs() {
       try {
@@ -343,11 +342,11 @@ export default {
         // Pendentes primeiro
         this.rentals.sort((a, b) => {
           if (a.status === "Pendente" && b.status !== "Pendente") {
-            return -1; 
+            return -1;
           } else if (a.status !== "Pendente" && b.status === "Pendente") {
-            return 1; 
+            return 1;
           } else {
-            return 0; 
+            return 0;
           }
         });
       } catch (error) {
@@ -401,7 +400,6 @@ export default {
             usuario_id: selectedUsuario,
             data_aluguel: this.data_aluguel,
             data_previsao: this.data_previsao,
-            status: "Pendente",
           };
           Rental.create(novoAlug)
             .then((response) => {
@@ -431,29 +429,32 @@ export default {
     },
     // Excluir
     openModalDelete(aluguel) {
-      this.selectedAluguelId = aluguel.id;
-      this.livro_id = aluguel.livro_id;
-      this.usuario_id = aluguel.usuario_id;
-      this.data_aluguel = aluguel.data_aluguel;
-      this.data_previsao = aluguel.data_previsao;
-      this.data_devolucao = aluguel.data_devolucao;
-      this.dialogDelete = true;
+      this.update = { ...aluguel };
+      this.confirmDelete(this.update);
     },
     closeModalDelete() {
       this.dialogDelete = false;
     },
-    confirmDelete() {
+    confirmDelete(rental) {
+      const selectedBook = this.listBooks.find(
+        (book) => book.nome === rental.livro_id
+      );
+      const selectedUser = this.listUsers.find(
+        (user) => user.nome === rental.usuario_id
+      );
       const deleteAlug = {
-        id: this.selectedAluguelId,
-        livro_id: this.livro_id,
-        usuario_id: this.usuario_id,
-        data_aluguel: this.data_aluguel,
-        data_previsao: this.data_previsao,
-        data_devolucao: this.data_devolucao,
+        id: rental.id,
+        livro_id: selectedBook,
+        usuario_id: selectedUser,
+        data_aluguel: this.parseDate(rental.data_aluguel),
+        data_previsao: this.parseDate(rental.data_previsao),
+        data_devolucao:
+          rental.data_devolucao !== "Pendente" ? rental.data_devolucao : null,
       };
+      console.log(deleteAlug);
       Rental.delete(deleteAlug)
         .then((response) => {
-          if (response.status === 200 && !deleteAlug.data_devolucao) {
+          if (response.status === 200) {
             Swal.fire({
               icon: "success",
               title: "Aluguel deletado com êxito!",
@@ -490,13 +491,12 @@ export default {
     },
     // Devolução
     openModalDevol(aluguel) {
-      if (aluguel.data_devolucao == null) {
+      if (aluguel.data_devolucao == "Pendente") {
         this.selectedAlugId = aluguel.id;
         this.livro_id = aluguel.livro_id;
         this.usuario_id = aluguel.usuario_id;
-        this.data_aluguel = aluguel.data_aluguel;
-        this.data_previsao = aluguel.data_previsao;
-        this.status = "Devolvido";
+        this.data_aluguel = this.parseDate(aluguel.data_aluguel);
+        this.data_previsao = this.parseDate(aluguel.data_previsao);
         this.dialogDevol = true;
       } else {
         Swal.fire({
@@ -523,7 +523,6 @@ export default {
         data_aluguel: this.data_aluguel,
         data_previsao: this.data_previsao,
         data_devolucao: new Date().toISOString().substr(0, 10),
-        status: "Devolvido",
       };
       Rental.update(AlugDevolvido)
         .then(() => {
