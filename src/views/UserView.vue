@@ -15,6 +15,7 @@
         <v-data-table
           dark
           :headers="headers"
+          :header-props="headerprops"
           :items="users"
           :items-per-page="5"
           class="elevation-1"
@@ -162,6 +163,9 @@ export default {
         { text: "Email", value: "email" },
         { text: "Ações", value: "acoes", sortable: false },
       ],
+      headerprops: {
+        sortByText: "Ordenar Por",
+      },
       users: [],
       nome: "",
       endereco: "",
@@ -223,6 +227,15 @@ export default {
       User.list()
         .then((response) => {
           this.users = response.data;
+          this.users.sort((a, b) => {
+            if (a.id > b.id) {
+              return 1;
+            } else if (a.id < b.id) {
+              return -1;
+            } else {
+              return 0;
+            }
+          });
         })
         .catch((error) => {
           console.error("Erro ao buscar usuarios", error);

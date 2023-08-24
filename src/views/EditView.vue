@@ -15,6 +15,7 @@
         <v-data-table
           dark
           :headers="headers"
+          :header-props="headerprops"
           :items="publishers"
           :items-per-page="5"
           class="elevation-1"
@@ -136,6 +137,9 @@ export default {
         { text: "Cidade", value: "cidade" },
         { text: "Ações", value: "acoes", sortable: false },
       ],
+      headerprops: {
+        sortByText: "Ordenar Por",
+      },
       publishers: [],
       nome: "",
       cidade: "",
@@ -181,6 +185,15 @@ export default {
       Publisher.list()
         .then((response) => {
           this.publishers = response.data;
+          this.publishers.sort((a, b) => {
+            if (a.id > b.id) {
+              return 1;
+            } else if (a.id < b.id) {
+              return -1;
+            } else {
+              return 0;
+            }
+          });
         })
         .catch((error) => {
           console.error("Erro ao buscar editoras:", error);

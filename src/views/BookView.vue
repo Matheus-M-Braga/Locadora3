@@ -15,6 +15,7 @@
         <v-data-table
           dark
           :headers="headers"
+          :header-props="headerprops"
           :items="books"
           :items-per-page="5"
           class="elevation-1"
@@ -143,7 +144,7 @@
 </template>
 
 <script>
-import Livro from "@/services/book";
+import Book from "@/services/book";
 import Publisher from "@/services/edit";
 import Swal from "sweetalert2";
 import { validationMixin } from "vuelidate";
@@ -173,6 +174,9 @@ export default {
         { text: "Alugados", value: "totalalugado" },
         { text: "Ações", value: "acoes", sortable: false },
       ],
+      headerprops: {
+        sortByText: "Ordenar Por",
+      },
       books: [],
       listPublishers: [],
       nome: "",
@@ -242,10 +246,18 @@ export default {
     },
     // Listar
     fetchBooks() {
-      Livro.list()
+      Book.list()
         .then((response) => {
           this.books = response.data;
-          console.log(this.books);
+          this.books.sort((a, b) => {
+            if (a.id > b.id) {
+              return 1;
+            } else if (a.id < b.id) {
+              return -1;
+            } else {
+              return 0;
+            }
+          });
         })
         .catch((error) => {
           console.error("Erro na busca de livros", error);
@@ -315,12 +327,12 @@ export default {
               quantidade: this.quantidade,
               totalalugado: "0",
             };
-            Livro.create(newbook)
+            Book.create(newbook)
               .then((response) => {
                 this.books.push({ id: response.data.id, ...newbook });
                 Swal.fire({
                   icon: "success",
-                  title: "Livro adicionado com êxito!",
+                  title: "Book adicionado com êxito!",
                   showConfirmButton: false,
                   timer: 3500,
                 });
@@ -351,7 +363,7 @@ export default {
               lancamento: this.lancamento,
               quantidade: this.quantidade,
             };
-            Livro.update(editedbook)
+            Book.update(editedbook)
               .then(() => {
                 this.books = this.books.map((book) => {
                   if (this.bookId === editedbook.id) {
@@ -404,7 +416,7 @@ export default {
         editora: this.editora,
         lancamento: this.lancamento,
       };
-      Livro.delete(deletedbook)
+      Book.delete(deletedbook)
         .then((response) => {
           if (response.status === 200) {
             Swal.fire({

@@ -23,7 +23,7 @@
           :header-props="headerprops"
           :footer-props="{
             'items-per-page-text': 'Registros por página',
-            'items-per-page-options': [5, 10, 15, this.alugs.length],
+            'items-per-page-options': [5, 10, 15, this.rentals.length],
           }"
         >
           <template v-slot:[`item.status`]="{ item }">
@@ -35,10 +35,18 @@
           </template>
           <template v-slot:[`item.acoes`]="{ item }">
             <td>
-              <v-icon v-if="item.data_devolucao === 'Pendente'" class="mr-2" @click="openModalDevol(item)">
+              <v-icon
+                v-if="item.data_devolucao === 'Pendente'"
+                class="mr-2"
+                @click="openModalDevol(item)"
+              >
                 mdi-book
               </v-icon>
-              <v-icon v-if="item.data_devolucao === 'Pendente'" class="" @click="openModalDelete(item)">
+              <v-icon
+                v-if="item.data_devolucao === 'Pendente'"
+                class=""
+                @click="openModalDelete(item)"
+              >
                 mdi-delete
               </v-icon>
             </td>
@@ -77,7 +85,6 @@
                   :error-messages="UserError"
                   @input="$v.usuario_id.$touch()"
                   @blur="$v.usuario_id.$touch()"
-                  :filter="filter"
                 ></v-select>
               </v-col>
               <v-col cols="12">
@@ -202,7 +209,7 @@ export default {
       headerprops: {
         sortByText: "Ordenar Por",
       },
-      alugs: [],
+      rentals: [],
       listBooks: [],
       listUsers: [],
       livro_id: "",
@@ -247,7 +254,7 @@ export default {
     },
     filteredRentals() {
       const searchValue = this.search.toLowerCase();
-      return this.alugs.filter((rental) => {
+      return this.rentals.filter((rental) => {
         for (const prop in rental) {
           const propValue = rental[prop].toString().toLowerCase();
           if (propValue.includes(searchValue)) {
@@ -262,22 +269,6 @@ export default {
     this.fetchAlugs();
   },
   methods: {
-    // search
-    convertSearchToDate(search) {
-      const parts = search.split("/");
-      if (parts.length >= 2 && parts.length <= 3) {
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10);
-        const year =
-          parts.length === 3
-            ? parseInt(parts[2], 10)
-            : new Date().getFullYear();
-        if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-          return new Date(year, month, day);
-        }
-      }
-      return null;
-    },
     // Calcula a data limite
     MaxDate() {
       const today = new Date();
@@ -324,7 +315,7 @@ export default {
           nome: usuario.nome,
         }));
 
-        this.alugs = rentalsResponse.data.map((rental) => {
+        this.rentals = rentalsResponse.data.map((rental) => {
           const devolucaoDate = rental.data_devolucao;
           const previsaoDate = rental.data_previsao;
           let statusInfo;
@@ -348,6 +339,16 @@ export default {
               : "Pendente",
             status: statusInfo,
           };
+        });
+        // Pendentes primeiro
+        this.rentals.sort((a, b) => {
+          if (a.status === "Pendente" && b.status !== "Pendente") {
+            return -1; 
+          } else if (a.status !== "Pendente" && b.status === "Pendente") {
+            return 1; 
+          } else {
+            return 0; 
+          }
         });
       } catch (error) {
         console.error("Erro ao buscar informações:", error);
@@ -404,8 +405,7 @@ export default {
           };
           Rental.create(novoAlug)
             .then((response) => {
-              this.alugs.push({ id: response.data.id, ...novoAlug });
-
+              this.rentals.push({ id: response.data.id, ...novoAlug });
               Swal.fire({
                 icon: "success",
                 title: "Aluguel adicionado com êxito!",
@@ -486,7 +486,7 @@ export default {
         });
     },
     removerAluguelDaLista(aluguelId) {
-      this.alugs = this.alugs.filter((aluguel) => aluguel.id !== aluguelId);
+      this.rentals = this.rentals.filter((aluguel) => aluguel.id !== aluguelId);
     },
     // Devolução
     openModalDevol(aluguel) {
@@ -527,7 +527,7 @@ export default {
       };
       Rental.update(AlugDevolvido)
         .then(() => {
-          this.alugs = this.alugs.map((aluguel) => {
+          this.rentals = this.rentals.map((aluguel) => {
             if (this.selectedALugId === AlugDevolvido.id) {
               return AlugDevolvido;
             } else {

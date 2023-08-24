@@ -1,7 +1,6 @@
 <template>
   <v-flex sm6 xs12 md6>
     <div class="chart_container">
-      <div class="title text-center">Livros mais alugados</div>
       <canvas ref="myChart" width="450" height="200" class="chartBar"></canvas>
     </div>
   </v-flex>
@@ -9,20 +8,20 @@
 
 <script>
 import Chart from "chart.js";
-import Aluguel from "@/services/alug";
+import Rental from "@/services/alug";
 
 export default {
   data() {
     return {
-      alugs: [],
-      maisalugados: [],
+      rentals: [],
+      mostrented: [],
     };
   },
   mounted() {
-    this.fetchAlugs();
+    this.listRentals();
   },
   watch: {
-    alugs: {
+    rentals: {
       handler() {
         this.updateBarChart();
       },
@@ -30,11 +29,11 @@ export default {
     },
   },
   methods: {
-    fetchAlugs() {
-      Aluguel.list()
+    listRentals() {
+      Rental.list()
         .then((response) => {
-          this.alugs = response.data;
-          this.sortAlugs();
+          this.rentals = response.data;
+          this.sortRentals();
         })
         .catch((error) => {
           console.error("Erro na busca de aluguéis", error);
@@ -48,42 +47,35 @@ export default {
       }
       return label;
     },
-    sortAlugs() {
+    sortRentals() {
       // Mais alugados
-      const AlugsCount = {};
-      this.alugs.forEach((alug) => {
-        const livronome = alug.livro_id.nome;
-        if (AlugsCount[livronome]) {
-          AlugsCount[livronome]++;
+      const RentalCount = {};
+      this.rentals.forEach((rental) => {
+        const bookname = rental.livro_id.nome;
+        if (RentalCount[bookname]) {
+          RentalCount[bookname]++;
         } else {
-          AlugsCount[livronome] = 1;
+          RentalCount[bookname] = 1;
         }
       });
-      this.maisalugados = Object.keys(AlugsCount)
-        .sort((a, b) => AlugsCount[b] - AlugsCount[a])
-        .map((livronome) => ({ livronome, quantidade: AlugsCount[livronome] }));
+      this.mostrented = Object.keys(RentalCount)
+        .sort((a, b) => RentalCount[b] - RentalCount[a])
+        .map((bookname) => ({ bookname, quantidade: RentalCount[bookname] }));
     },
     updateBarChart() {
-      // Barra
       const ctx = this.$refs.myChart.getContext("2d");
+      const topFour = this.mostrented.slice(0, 4)
+      const labels = topFour.map((item) => this.truncateLabel(item.bookname))
+      const data = topFour.map((item) => item.quantidade);
+      console.log(data);
       new Chart(ctx, {
         type: "bar",
         data: {
-          labels: [
-            this.truncateLabel(this.maisalugados[0].livronome),
-            this.truncateLabel(this.maisalugados[1].livronome),
-            this.truncateLabel(this.maisalugados[2].livronome),
-            this.truncateLabel(this.maisalugados[3].livronome),
-          ],
+          labels: labels,
           datasets: [
             {
               label: "",
-              data: [
-                this.maisalugados[0].quantidade,
-                this.maisalugados[1].quantidade,
-                this.maisalugados[2].quantidade,
-                this.maisalugados[3].quantidade,
-              ],
+              data: data,
               backgroundColor: [
                 "rgb(168, 71, 82)",
                 "rgb(51, 126, 204)",
@@ -98,6 +90,12 @@ export default {
         options: {
           legend: {
             display: false,
+          },
+          title: {
+            display: true,
+            text: "Livros mais alugados",
+            fontSize: 25,
+            fontFamily: "Roboto",
           },
         },
       });
