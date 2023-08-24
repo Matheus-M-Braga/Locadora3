@@ -158,8 +158,8 @@ export default {
       headers: [
         { text: "ID", value: "id" },
         { text: "Nome", value: "nome" },
-        { text: "Endereço", value: "endereco" },
         { text: "Cidade", value: "cidade" },
+        { text: "Endereço", value: "endereco" },
         { text: "Email", value: "email" },
         { text: "Ações", value: "acoes", sortable: false },
       ],

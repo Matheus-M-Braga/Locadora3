@@ -213,7 +213,7 @@ export default {
       dialog: false,
       dialogDelete: false,
       dialogDevol: false,
-      selectedAlugId: null,
+      rentalId: null,
     };
   },
   computed: {
@@ -258,7 +258,7 @@ export default {
     },
   },
   mounted() {
-    this.fetchAlugs();
+    this.listAlugs();
   },
   methods: {
     // Calcula a data limite
@@ -299,7 +299,7 @@ export default {
       return `${year}-${month}-${day}`;
     },
     // Listar
-    async fetchAlugs() {
+    async listAlugs() {
       try {
         const [booksResponse, rentalsResponse, usersResponse] =
           await Promise.all([Book.list(), Rental.list(), User.list()]);
@@ -335,7 +335,7 @@ export default {
             data_previsao: this.formatDate(rental.data_previsao),
             data_devolucao: rental.data_devolucao
               ? this.formatDate(rental.data_devolucao)
-              : "Pendente",
+              : "...",
             status: statusInfo,
           };
         });
@@ -364,19 +364,6 @@ export default {
       this.data_aluguel = new Date().toISOString().substr(0, 10);
       this.data_previsao = "";
       this.data_devolucao = "";
-      this.status = "Pendente";
-    },
-    // Abrir o modal para editar
-    openModalEdit(aluguel) {
-      this.ModalTitle = "Editar Aluguel";
-      this.dialog = true;
-      this.$v.$reset();
-
-      this.selectedAlugId = aluguel.id;
-      this.livro_id = aluguel.livro_id;
-      this.usuario_id = aluguel.usuario_id;
-      this.data_aluguel = aluguel.data_aluguel;
-      this.data_previsao = aluguel.data_previsao;
     },
     // Fechar modal
     closeModal() {
@@ -388,16 +375,16 @@ export default {
       if (!this.$v.$error) {
         // Identifica qual modal foi ativado (Add)
         if (this.ModalTitle === "Adicionar Aluguel") {
-          const selectedLivro = this.listBooks.find(
+          const selectedBook = this.listBooks.find(
             (livro) => livro.nome === this.livro_id
           );
-          const selectedUsuario = this.listUsers.find(
+          const selectedUser = this.listUsers.find(
             (usuario) => usuario.nome === this.usuario_id
           );
 
           const novoAlug = {
-            livro_id: selectedLivro,
-            usuario_id: selectedUsuario,
+            livro_id: selectedBook,
+            usuario_id: selectedUser,
             data_aluguel: this.data_aluguel,
             data_previsao: this.data_previsao,
           };
@@ -411,8 +398,7 @@ export default {
                 timer: 3500,
               });
               this.closeModal();
-              this.fetchAlugs();
-              console.log(response);
+              this.listAlugs();
             })
             .catch((error) => {
               console.error("Erro ao adicionar o aluguel:", error);
@@ -428,8 +414,8 @@ export default {
       }
     },
     // Excluir
-    openModalDelete(aluguel) {
-      this.update = { ...aluguel };
+    openModalDelete(rental) {
+      this.update = { ...rental };
       this.confirmDelete(this.update);
     },
     closeModalDelete() {
@@ -448,10 +434,8 @@ export default {
         usuario_id: selectedUser,
         data_aluguel: this.parseDate(rental.data_aluguel),
         data_previsao: this.parseDate(rental.data_previsao),
-        data_devolucao:
-          rental.data_devolucao !== "Pendente" ? rental.data_devolucao : null,
+        data_devolucao: rental.data_devolucao !== "..." ? rental.data_devolucao : null,
       };
-      console.log(deleteAlug);
       Rental.delete(deleteAlug)
         .then((response) => {
           if (response.status === 200) {
@@ -461,10 +445,9 @@ export default {
               showConfirmButton: false,
               timer: 3500,
             });
-            this.removerAluguelDaLista(deleteAlug.id);
+            this.removeRental(deleteAlug.id);
             this.closeModalDelete();
           } else {
-            console.log(deleteAlug.data_devolucao);
             Swal.fire({
               icon: "error",
               title: "Erro ao deletar aluguel!",
@@ -475,7 +458,6 @@ export default {
         })
         .catch((e) => {
           console.error("Erro ao deletar aluguel:", e);
-          console.log(deleteAlug);
           Swal.fire({
             icon: "error",
             title: "Erro ao deletar aluguel!",
@@ -486,17 +468,17 @@ export default {
           this.closeModalDelete();
         });
     },
-    removerAluguelDaLista(aluguelId) {
-      this.rentals = this.rentals.filter((aluguel) => aluguel.id !== aluguelId);
+    removeRental(rentalId) {
+      this.rentals = this.rentals.filter((rental) => rental.id !== rentalId);
     },
     // Devolução
-    openModalDevol(aluguel) {
-      if (aluguel.data_devolucao == "Pendente") {
-        this.selectedAlugId = aluguel.id;
-        this.livro_id = aluguel.livro_id;
-        this.usuario_id = aluguel.usuario_id;
-        this.data_aluguel = this.parseDate(aluguel.data_aluguel);
-        this.data_previsao = this.parseDate(aluguel.data_previsao);
+    openModalDevol(rental) {
+      if (rental.data_devolucao == "...") {
+        this.rentalId = rental.id;
+        this.livro_id = rental.livro_id;
+        this.usuario_id = rental.usuario_id;
+        this.data_aluguel = this.parseDate(rental.data_aluguel);
+        this.data_previsao = this.parseDate(rental.data_previsao);
         this.dialogDevol = true;
       } else {
         Swal.fire({
@@ -509,28 +491,28 @@ export default {
       }
     },
     confirmDevol() {
-      const selectedLivro = this.listBooks.find(
+      const selectedBook = this.listBooks.find(
         (livro) => livro.nome === this.livro_id
       );
-      const selectedUsuario = this.listUsers.find(
+      const selectedUser = this.listUsers.find(
         (usuario) => usuario.nome === this.usuario_id
       );
 
-      const AlugDevolvido = {
-        id: this.selectedAlugId,
-        livro_id: selectedLivro ? { ...selectedLivro } : this.livro_id,
-        usuario_id: selectedUsuario ? { ...selectedUsuario } : this.usuario_id,
+      const returnedRental = {
+        id: this.rentalId,
+        livro_id: selectedBook ? { ...selectedBook } : this.livro_id,
+        usuario_id: selectedUser ? { ...selectedUser } : this.usuario_id,
         data_aluguel: this.data_aluguel,
         data_previsao: this.data_previsao,
         data_devolucao: new Date().toISOString().substr(0, 10),
       };
-      Rental.update(AlugDevolvido)
+      Rental.update(returnedRental)
         .then(() => {
-          this.rentals = this.rentals.map((aluguel) => {
-            if (this.selectedALugId === AlugDevolvido.id) {
-              return AlugDevolvido;
+          this.rentals = this.rentals.map((rental) => {
+            if (this.selectedALugId === returnedRental.id) {
+              return returnedRental;
             } else {
-              return aluguel;
+              return rental;
             }
           });
           Swal.fire({
@@ -540,8 +522,8 @@ export default {
             timer: 3500,
           });
           this.closeModalDevol();
-          this.fetchAlugs();
-          this.removerAluguelDaLista(AlugDevolvido.id);
+          this.listAlugs();
+          this.removeRental(returnedRental.id);
         })
         .catch((error) => {
           console.error("Erro ao devolver aluguel:", error);

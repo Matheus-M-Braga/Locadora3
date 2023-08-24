@@ -96,7 +96,7 @@
               <v-col cols="12">
                 <v-text-field
                   v-model="quantidade"
-                  label="Quantidade"
+                  label="Estoque"
                   required
                   :error-messages="AmountError"
                   @input="$v.quantidade.$touch()"
@@ -332,7 +332,7 @@ export default {
                 this.books.push({ id: response.data.id, ...newbook });
                 Swal.fire({
                   icon: "success",
-                  title: "Book adicionado com êxito!",
+                  title: "Livro adicionado com êxito!",
                   showConfirmButton: false,
                   timer: 3500,
                 });
