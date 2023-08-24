@@ -3,8 +3,8 @@ import VueRouter from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import UserView from '../views/UserView.vue'
 import BookView from '../views/BookView.vue'
-import EditView from '../views/EditView.vue'
-import AlugView from '../views/AlugView.vue'
+import EditView from '../views/PublisherView.vue'
+import AlugView from '../views/RentalView.vue'
 
 Vue.use(VueRouter)
 
@@ -21,7 +21,7 @@ const routes = [
   },
   {
     path: '/livro',
-    name: 'nook',
+    name: 'book',
     component: BookView
   },
   {
