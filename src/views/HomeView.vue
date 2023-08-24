@@ -167,8 +167,8 @@ import LineChart from "@/components/LineChart";
 import PieChart from "@/components/PieChart";
 import User from "@/services/users";
 import Book from "@/services/book";
-import Publi from "@/services/edit";
-import Rental from "@/services/alug";
+import Publi from "@/services/publi";
+import Rental from "@/services/rental";
 export default {
   data: () => ({
     books: [],

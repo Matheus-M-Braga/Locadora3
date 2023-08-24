@@ -145,7 +145,7 @@
 
 <script>
 import Book from "@/services/book";
-import Publisher from "@/services/edit";
+import Publisher from "@/services/publi";
 import Swal from "sweetalert2";
 import { validationMixin } from "vuelidate";
 import { required, maxLength } from "vuelidate/lib/validators";

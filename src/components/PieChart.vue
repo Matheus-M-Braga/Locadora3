@@ -13,7 +13,7 @@
 
 <script>
 import Chart from "chart.js";
-import Rentals from "@/services/alug";
+import Rentals from "@/services/rental";
 
 export default {
   data() {

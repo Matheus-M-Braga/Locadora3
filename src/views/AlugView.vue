@@ -176,7 +176,7 @@
 </template>
 
 <script>
-import Rental from "@/services/alug";
+import Rental from "@/services/rental";
 import Book from "@/services/book";
 import User from "@/services/users";
 import Swal from "sweetalert2";

@@ -8,7 +8,7 @@
 
 <script>
 import Chart from "chart.js";
-import Rental from "@/services/alug";
+import Rental from "@/services/rental";
 
 export default {
   data() {
