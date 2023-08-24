@@ -16,14 +16,14 @@
           dark
           :headers="headers"
           :items="filteredRentals"
-          :items-per-page="5"
+          :items-per-page="7"
           mobile-breakpoint="890"
           class="elevation-1"
           :no-results-text="noDataText"
           :header-props="headerprops"
           :footer-props="{
             'items-per-page-text': 'Registros por página',
-            'items-per-page-options': [5, 10, 15, this.rentals.length],
+            'items-per-page-options': [7, 10, 15, this.rentals.length],
           }"
         >
           <template v-slot:[`item.status`]="{ item }">
