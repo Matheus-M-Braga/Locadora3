@@ -19,7 +19,7 @@
           :items-per-page="7"
           mobile-breakpoint="890"
           class="elevation-1"
-          :no-results-text="noDataText"
+          :no-results-text="'Nenhum registro encontrado'"
           :header-props="headerprops"
           :footer-props="{
             'items-per-page-text': 'Registros por página',
