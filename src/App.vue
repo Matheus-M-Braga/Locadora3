@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <LayoutPage v-if="!login" />
+    <LayoutPage/>
     <router-view></router-view>
   </v-app>
 </template>
@@ -16,9 +16,6 @@ import LayoutPage from './components/LayoutPage'
       LayoutPage,
     },
     computed: {
-      login() {
-        return this.$route.path === '/login';
-      }
     }
   }
 </script>

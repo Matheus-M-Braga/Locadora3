@@ -1,6 +1,6 @@
 <template>
   <div class="container_master">
-    <v-container>
+    <v-container fluid>
       <v-layout row justify-center>
         <!-- ultimo alugado-->
         <v-flex sm6 xs12 md6 lg4>

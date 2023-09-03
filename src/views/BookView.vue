@@ -1,16 +1,12 @@
 <template>
-  <div class="container_master">
-    <v-container>
-      <v-layout row wrap justify-space-between class="top">
-        <div class="title_btn">
-          <h1 class="subheading black--text">Livros</h1>
-          <v-btn dark @click="openModalCreate">Novo +</v-btn>
-        </div>
-        <div class="searchbar">
-          <input type="text" v-model="search" placeholder="Pesquisar..." />
-          <v-icon right>mdi-magnify</v-icon>
-        </div>
-      </v-layout>
+  <div>
+    <v-container fluid class="pa-4">
+      <TableTop
+        :search="search"
+        @updateSearch="updateSearch"
+        @open-modal="openModalCreate"
+        :PageTitle="PageTitle"
+      />
       <v-row wrap class="table">
         <v-data-table
           dark
@@ -149,9 +145,12 @@ import Publisher from "@/services/publi";
 import Swal from "sweetalert2";
 import { validationMixin } from "vuelidate";
 import { required, maxLength } from "vuelidate/lib/validators";
+import TableTop from "@/components/TableTop.vue";
 export default {
+  components: {
+    TableTop,
+  },
   mixins: [validationMixin],
-
   validations: {
     nome: { required },
     autor: { required },
@@ -164,6 +163,7 @@ export default {
       noDataText: "Nenhum registro encontrado",
       search: "",
       ModalTitle: "",
+      PageTitle: "Livros",
       headers: [
         { text: "ID", value: "id" },
         { text: "Nome", value: "nome" },
@@ -235,6 +235,9 @@ export default {
     this.fetchPubli();
   },
   methods: {
+    updateSearch(newSearchValue) {
+      this.search = newSearchValue;
+    },
     // search
     filter(value, search) {
       return (

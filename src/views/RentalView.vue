@@ -1,16 +1,12 @@
 <template>
-  <div class="container_master">
-    <v-container>
-      <v-layout row wrap justify-space-between class="top">
-        <div class="title_btn">
-          <h1 class="subheading black--text">Aluguéis</h1>
-          <v-btn dark @click="openModalCreate">Novo +</v-btn>
-        </div>
-        <div class="searchbar">
-          <input type="text" v-model="search" placeholder="Pesquisar..." />
-          <v-icon>mdi-magnify</v-icon>
-        </div>
-      </v-layout>
+  <div>
+    <v-container fluid class="pa-4">
+      <TableTop
+        :search="search"
+        @updateSearch="updateSearch"
+        @open-modal="openModalCreate"
+        :PageTitle="PageTitle"
+      />
       <v-layout row wrap class="table">
         <v-data-table
           dark
@@ -35,10 +31,18 @@
           </template>
           <template v-slot:[`item.acoes`]="{ item }">
             <td>
-              <v-icon v-if="item.status == 'Pendente'" class="mr-2" @click="openModalDevol(item)">
+              <v-icon
+                v-if="item.status == 'Pendente'"
+                class="mr-2"
+                @click="openModalDevol(item)"
+              >
                 mdi-book
               </v-icon>
-              <v-icon v-if="item.status == 'Pendente'" class="" @click="openModalDelete(item)">
+              <v-icon
+                v-if="item.status == 'Pendente'"
+                class=""
+                @click="openModalDelete(item)"
+              >
                 mdi-delete
               </v-icon>
             </td>
@@ -46,7 +50,7 @@
         </v-data-table>
       </v-layout>
     </v-container>
-    <!-- modal -->
+    <!-- modal create -->
     <v-row justify="center">
       <v-dialog v-model="dialog" persistent max-width="500px">
         <v-card dark>
@@ -125,7 +129,7 @@
           </v-card-title>
           <v-card-text>
             <v-container>
-              Tem certeza que deseja excluir o aluguel selecionado?
+              Tem certeza que deseja excluir o item selecionado?
             </v-container>
           </v-card-text>
           <v-card-actions>
@@ -174,9 +178,13 @@ import User from "@/services/users";
 import Swal from "sweetalert2";
 import { validationMixin } from "vuelidate";
 import { required } from "vuelidate/lib/validators";
+import TableTop from "@/components/TableTop";
 export default {
-  mixins: [validationMixin],
+  components: {
+    TableTop,
+  },
 
+  mixins: [validationMixin],
   validations: {
     livro_id: { required },
     usuario_id: { required },
@@ -188,6 +196,8 @@ export default {
       noDataText: "Nenhum registro encontrado",
       search: "",
       ModalTitle: "",
+      PageTitle: "Aluguéis",
+
       headers: [
         { text: "ID", value: "id" },
         { text: "Livro", align: "start", value: "livro_id" },
@@ -261,6 +271,9 @@ export default {
     this.listAlugs();
   },
   methods: {
+    updateSearch(newSearchValue) {
+      this.search = newSearchValue;
+    },
     // Calcula a data limite
     MaxDate() {
       const today = new Date();
@@ -417,12 +430,12 @@ export default {
     // Excluir
     openModalDelete(rental) {
       this.update = { ...rental };
-      this.dialogDelete = true
+      this.dialogDelete = true;
     },
     closeModalDelete() {
       this.dialogDelete = false;
     },
-    confirmDelete(rental) { 
+    confirmDelete(rental) {
       const selectedBook = this.listBooks.find(
         (book) => book.nome === rental.livro_id
       );
@@ -438,7 +451,7 @@ export default {
         data_devolucao:
           rental.data_devolucao !== "..." ? rental.data_devolucao : null,
       };
-      console.log(deleteAlug)
+      console.log(deleteAlug);
       Rental.delete(deleteAlug)
         .then((response) => {
           if (response.status === 200) {
@@ -476,33 +489,23 @@ export default {
     },
     // Devolução
     openModalDevol(rental) {
-      if (rental.data_devolucao == "...") {
-        this.update = { ...rental }
-        this.confirmDevol(this.update)
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Livro já foi devolvido!",
-          showConfirmButton: false,
-          timer: 3500,
-        });
-        this.closeModalDevol();
-      }
+      this.update = { ...rental };
+      this.confirmDevol(this.update);
+      this.closeModalDevol();
     },
     confirmDevol(rental) {
       const selectedBook = this.listBooks.find(
-        (book) => book.nome === this.livro_id
+        (book) => book.nome === rental.livro_id
       );
       const selectedUser = this.listUsers.find(
-        (user) => user.nome === this.usuario_id
+        (user) => user.nome === rental.usuario_id
       );
-
       const returnedRental = {
         id: rental.id,
         livro_id: selectedBook ? { ...selectedBook } : this.livro_id,
         usuario_id: selectedUser ? { ...selectedUser } : this.usuario_id,
         data_aluguel: this.parseDate(rental.data_aluguel),
-        data_previsao: this.parseDate(rental.data_devolucao),
+        data_previsao: this.parseDate(rental.data_previsao),
         data_devolucao: new Date().toISOString().substr(0, 10),
       };
       Rental.update(returnedRental)

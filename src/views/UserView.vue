@@ -1,16 +1,12 @@
 <template>
-  <div class="container_master">
-    <v-container>
-      <v-layout row wrap justify-space-between class="top">
-        <div class="title_btn">
-          <h1 class="subheading black--text">Usuários</h1>
-          <v-btn dark @click="openModalCreate">Novo +</v-btn>
-        </div>
-        <div class="searchbar">
-          <input type="text" v-model="search" placeholder="Pesquisar..." />
-          <v-icon>mdi-magnify</v-icon>
-        </div>
-      </v-layout>
+  <div>
+    <v-container fluid class="pa-4">
+      <TableTop
+        :search="search"
+        @updateSearch="updateSearch"
+        @open-modal="openModalCreate"
+        :PageTitle="PageTitle"
+      />
       <v-row wrap class="table">
         <v-data-table
           dark
@@ -100,9 +96,7 @@
               <v-btn color="red darken-1" text @click="closeModal">
                 Cancelar
               </v-btn>
-              <v-btn color="blue darken-1" text @click="confirm">
-                Salvar
-              </v-btn>
+              <v-btn color="blue darken-1" text @click="confirm"> Salvar </v-btn>
             </v-card-actions>
           </v-card>
         </v-form>
@@ -140,10 +134,14 @@ import User from "@/services/users";
 import Swal from "sweetalert2";
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
+import TableTop from "@/components/TableTop";
 
 export default {
-  mixins: [validationMixin],
+  components: {
+    TableTop,
+  },
 
+  mixins: [validationMixin],
   validations: {
     nome: { required },
     endereco: { required },
@@ -155,6 +153,7 @@ export default {
       noDataText: "Nenhum registro encontrado",
       search: "",
       ModalTitle: "",
+      PageTitle: "Usuários",
       headers: [
         { text: "ID", value: "id" },
         { text: "Nome", value: "nome" },
@@ -213,6 +212,9 @@ export default {
     },
   },
   methods: {
+    updateSearch(newSearchValue) {
+      this.search = newSearchValue;
+    },
     // search
     filter(value, search) {
       return (
