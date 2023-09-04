@@ -312,6 +312,15 @@ export default {
       const [day, month, year] = date.split("/");
       return `${year}-${month}-${day}`;
     },
+    // Pegar data atual
+    getDate() {
+      const brazilTimeZoneOffset = -3 * 60; // Fuso horário do Brasil em minutos (UTC -3)
+      const currentUTCDate = new Date();
+      const brazilCurrentDate = new Date(
+        currentUTCDate.getTime() + brazilTimeZoneOffset * 60 * 1000
+      );
+      return brazilCurrentDate.toISOString().substr(0, 10);
+    },
     // Listar
     async listAlugs() {
       try {
@@ -375,7 +384,7 @@ export default {
 
       this.livro_id = "";
       this.usuario_id = "";
-      this.data_aluguel = new Date().toISOString().substr(0, 10);
+      this.data_aluguel = this.getDate();
       this.data_previsao = "";
       this.data_devolucao = "";
     },

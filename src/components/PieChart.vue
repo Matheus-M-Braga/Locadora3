@@ -1,14 +1,7 @@
 <template>
-  <v-flex sm6 xs12 md6>
-    <div class="chart_container">
-      <canvas
-        ref="myPieChart"
-        width="450"
-        height="200"
-        class="chartPie"
-      ></canvas>
-    </div>
-  </v-flex>
+  <v-card elevation="4" class="col-6">
+    <canvas ref="myPieChart" width="450" height="200" class="chartPie"></canvas>
+  </v-card>
 </template>
 
 <script>

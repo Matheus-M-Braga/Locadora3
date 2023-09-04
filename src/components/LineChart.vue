@@ -1,9 +1,7 @@
 <template>
-  <v-flex sm6 xs12 md6>
-    <div class="chart_container">
-      <canvas ref="myChart" width="450" height="200" class="chartBar"></canvas>
-    </div>
-  </v-flex>
+  <v-card elevation="4" class="col-6">
+    <canvas ref="myChart" width="450" height="200" class="chartBar"></canvas>
+  </v-card>
 </template>
 
 <script>
@@ -64,8 +62,8 @@ export default {
     },
     updateBarChart() {
       const ctx = this.$refs.myChart.getContext("2d");
-      const topFour = this.mostrented.slice(0, 4)
-      const labels = topFour.map((item) => this.truncateLabel(item.bookname))
+      const topFour = this.mostrented.slice(0, 4);
+      const labels = topFour.map((item) => this.truncateLabel(item.bookname));
       const data = topFour.map((item) => item.quantidade);
       console.log(data);
       new Chart(ctx, {

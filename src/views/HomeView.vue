@@ -1,151 +1,23 @@
 <template>
-  <div class="container_master">
-    <v-container fluid>
+    <v-container fluid class="pa-4">
       <v-layout row justify-center>
-        <!-- ultimo alugado-->
-        <v-flex sm6 xs12 md6 lg4>
-          <v-card class="ma-3" dark>
+        <v-flex v-for="card in cards" :key="card.id" sm6 xs12 md6 lg4>
+          <v-card class="mr-3 mb-3 mb-4 mt-2" elevation="4" dark :loading="loadingCard">
             <v-list-item>
               <v-list-item-avatar tile="" class="mt-n7">
                 <v-sheet
-                  color="blue-grey darken-2"
                   width="80"
                   height="80"
                   elevation="10"
                 >
-                  <v-icon dark large>mdi-book-sync</v-icon>
+                  <v-icon dark large>{{ card.icon }}</v-icon>
                 </v-sheet>
               </v-list-item-avatar>
               <v-list-item-content>
-                <div class="title">Último livro alugado</div>
+                <div class="title">{{ card.title }}</div>
                 <br /><br /><br />
                 <v-list-item-title class="mb-1">
-                  {{ lastRented }}
-                </v-list-item-title>
-                <div><v-divider></v-divider></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <!-- total disponível -->
-        <v-flex sm6 xs12 md6 lg4>
-          <v-card class="ma-3" dark>
-            <v-list-item>
-              <v-list-item-avatar tile="" class="mt-n7">
-                <v-sheet
-                  color="blue-grey darken-2"
-                  width="80"
-                  height="80"
-                  elevation="10"
-                >
-                  <v-icon dark large>mdi-book-check</v-icon>
-                </v-sheet>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <div class="title">Livros disponíveis</div>
-                <br /><br /><br />
-                <v-list-item-title class="mb-1">
-                  {{ availableBooks }}
-                </v-list-item-title>
-                <div><v-divider></v-divider></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <!-- livros alugados -->
-        <v-flex sm6 xs12 md6 lg4>
-          <v-card class="ma-3" dark>
-            <v-list-item>
-              <v-list-item-avatar tile="" class="mt-n7">
-                <v-sheet
-                  color="blue-grey darken-2"
-                  width="80"
-                  height="80"
-                  elevation="10"
-                >
-                  <v-icon dark large>mdi-book-open-variant</v-icon>
-                </v-sheet>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <div class="title">Livros alugados</div>
-                <br /><br /><br />
-                <v-list-item-title class="mb-1">
-                  {{ this.rented }}
-                </v-list-item-title>
-                <div><v-divider></v-divider></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <!-- Total de aluguéis -->
-        <v-flex sm6 xs12 md6 lg4>
-          <v-card class="ma-3" dark>
-            <v-list-item>
-              <v-list-item-avatar tile="" class="mt-n7">
-                <v-sheet
-                  color="blue-grey darken-2"
-                  width="80"
-                  height="80"
-                  elevation="10"
-                >
-                  <v-icon dark large>mdi-book-account</v-icon>
-                </v-sheet>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <div class="title">Total de Aluguéis</div>
-                <br /><br /><br />
-                <v-list-item-title class="mb-1">
-                  {{ this.rentals.length }}
-                </v-list-item-title>
-                <div><v-divider></v-divider></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <!-- Usuários -->
-        <v-flex sm6 xs12 md6 lg4>
-          <v-card class="ma-3" dark>
-            <v-list-item>
-              <v-list-item-avatar tile="" class="mt-n7">
-                <v-sheet
-                  color="blue-grey darken-2"
-                  width="80"
-                  height="80"
-                  elevation="10"
-                >
-                  <v-icon dark large>mdi-account</v-icon>
-                </v-sheet>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <div class="title">Usuários cadastrados</div>
-                <br /><br /><br />
-                <v-list-item-title class="mb-1">
-                  {{ this.users }}
-                </v-list-item-title>
-                <div><v-divider></v-divider></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <!-- Editoras -->
-        <v-flex sm6 xs12 md6 lg4>
-          <v-card class="ma-3" dark>
-            <v-list-item>
-              <v-list-item-avatar tile="" class="mt-n7">
-                <v-sheet
-                  color="blue-grey darken-2"
-                  width="80"
-                  height="80"
-                  elevation="10"
-                >
-                  <v-icon dark large>mdi-pencil</v-icon>
-                </v-sheet>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <div class="title">Editoras cadastradas</div>
-                <br /><br /><br />
-                <v-list-item-title class="mb-1">
-                  {{ this.publis }}
+                  {{ card.value }}
                 </v-list-item-title>
                 <div><v-divider></v-divider></div>
               </v-list-item-content>
@@ -153,13 +25,11 @@
           </v-card>
         </v-flex>
       </v-layout>
-      <!-- graficos -->
-      <v-layout row justify-space-between>
-        <LineChart />
+      <v-layout row wrap justify-space-between>
+        <LineChart :loading="loadingChart"/>
         <PieChart />
       </v-layout>
     </v-container>
-  </div>
 </template>
 
 <script>
@@ -171,6 +41,48 @@ import Publi from "@/services/publi";
 import Rental from "@/services/rental";
 export default {
   data: () => ({
+    cards: [
+      {
+        id: 1,
+        title: "Último livro alugado",
+        icon: "mdi-book-sync",
+        value: "",
+      },
+      {
+        id: 2,
+        title: "Livros disponíveis",
+        icon: "mdi-book-check",
+        value: "",
+      },
+      {
+        id: 3,
+        title: "Livros alugados",
+        icon: "mdi-book-open-variant",
+        value: "",
+      },
+      {
+        id: 4,
+        title: "Total de Aluguéis",
+        icon: "mdi-book-account",
+        value: "",
+      },
+      {
+        id: 5,
+        title: "Usuários cadastrados",
+        color: "blue-grey darken-2",
+        icon: "mdi-account",
+        value: "",
+      },
+      {
+        id: 6,
+        title: "Editoras cadastradas",
+        color: "blue-grey darken-2",
+        icon: "mdi-pencil",
+        value: "",
+      },
+    ],
+    loadingChart: false,
+    loadingCard: false,
     books: [],
     availableBooks: 0,
     rented: 0,
@@ -192,7 +104,14 @@ export default {
     PieChart,
   },
   methods: {
-    // listar livros
+    updateCardValues() {
+      this.cards[0].value = this.lastRented;
+      this.cards[1].value = this.availableBooks;
+      this.cards[2].value = this.rented;
+      this.cards[3].value = this.rentals.length;
+      this.cards[4].value = this.users;
+      this.cards[5].value = this.publis;
+    },
     fetchBooks() {
       Book.list()
         .then((response) => {
@@ -203,16 +122,22 @@ export default {
           console.error("Erro na busca de livros", error);
         });
     },
-    // Listar alugueis
     fetchAlugs() {
+      this.loadingChart = true
+      this.loadingCard = true
       Rental.list()
         .then((response) => {
           this.rentals = response.data;
           this.CalcAlug();
           this.totalCalc();
+          this.updateCardValues()
         })
         .catch((error) => {
           console.error("Erro na busca de aluguéis", error);
+        })
+        .finally(() =>{
+          this.loadingChart = false
+          this.loadingCard = false
         });
     },
     fetchUsersPubli() {
@@ -225,22 +150,17 @@ export default {
         this.publis = this.Listpublis.length;
       });
     },
-    // Livros
     CalcDisp() {
-      // Total disponível
       this.availableBooks = this.books.reduce(
         (total, book) => total + book.quantidade,
         0
       );
     },
     totalCalc() {
-      // filtra so os alugueis que nao estão devolvidos
       const filtereds = this.rentals.filter((rental) => !rental.data_devolucao);
       this.rented = filtereds.length;
     },
-    // Aluguéis
     CalcAlug() {
-      // Último alugado
       const last = this.rentals.reduce((prev, current) => {
         return prev.id < current.id ? current : prev;
       });
