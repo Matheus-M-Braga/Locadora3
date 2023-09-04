@@ -10,6 +10,7 @@
       <v-row wrap class="table">
         <v-data-table
           dark
+          :loading="loadingTable"
           :headers="headers"
           :header-props="headerprops"
           :items="users"
@@ -174,6 +175,7 @@ export default {
       dialogDelete: false,
       userId: null,
       emailExists: false,
+      loadingTable: false
     };
   },
   mounted() {
@@ -226,6 +228,7 @@ export default {
     },
     // Listar
     fetchUsers() {
+      this.loadingTable = true
       User.list()
         .then((response) => {
           this.users = response.data;
@@ -241,7 +244,10 @@ export default {
         })
         .catch((error) => {
           console.error("Erro ao buscar usuarios", error);
-        });
+        })
+        .finally(() => {
+          this.loadingTable = false
+        })
     },
     // Emails já cadastrados
     CheckEmails() {

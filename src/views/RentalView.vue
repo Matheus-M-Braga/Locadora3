@@ -10,6 +10,7 @@
       <v-layout row wrap class="table">
         <v-data-table
           dark
+          :loading="loadingTable"
           :headers="headers"
           :items="filteredRentals"
           :items-per-page="7"
@@ -224,6 +225,7 @@ export default {
       dialogDelete: false,
       dialogDevol: false,
       rentalId: null,
+      loadingTable: false
     };
   },
   computed: {
@@ -323,6 +325,7 @@ export default {
     },
     // Listar
     async listAlugs() {
+      this.loadingTable = true
       try {
         const [booksResponse, rentalsResponse, usersResponse] =
           await Promise.all([Book.list(), Rental.list(), User.list()]);
@@ -374,6 +377,8 @@ export default {
         });
       } catch (error) {
         console.error("Erro ao buscar informações:", error);
+      } finally {
+        this.loadingTable = false
       }
     },
     // Abrir o modal para adicionar

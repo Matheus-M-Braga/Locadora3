@@ -10,6 +10,7 @@
       <v-row wrap class="table">
         <v-data-table
           dark
+          :loading="loadingTable"
           :headers="headers"
           :header-props="headerprops"
           :items="publishers"
@@ -147,6 +148,7 @@ components: {
       dialogDelete: false,
       publisherId: null,
       nameExists: false,
+      loadingTable: false
     };
   },
   mounted() {
@@ -185,6 +187,7 @@ components: {
     },
     // Listar
     fetchPubli() {
+      this.loadingTable = true
       Publisher.list()
         .then((response) => {
           this.publishers = response.data;
@@ -200,7 +203,10 @@ components: {
         })
         .catch((error) => {
           console.error("Erro ao buscar editoras:", error);
-        });
+        })
+        .finally(() => {
+          this.loadingTable = false
+        })
     },
     CheckNames() {
       return this.publishers.some((publisher) => publisher.nome == this.nome);

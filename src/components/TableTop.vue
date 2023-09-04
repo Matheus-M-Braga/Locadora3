@@ -1,5 +1,5 @@
 <template>
-  <v-toolbar class="top">
+  <v-toolbar class="top sm-height-100">
     <v-row :align="'center'" class="my-0 mx-0">
       <v-toolbar-title class="title subheading text-h4 mr-15">{{
         PageTitle
@@ -28,18 +28,16 @@ export default {
   },
   data() {
     return {
-      localSearch: this.search, // Use uma propriedade local para manter o estado
+      localSearch: this.search,
     };
   },
   watch: {
     localSearch(newSearchValue) {
-      // Emitir um evento personalizado para atualizar a propriedade "search" no componente pai
       this.$emit("updateSearch", newSearchValue);
     },
   },
   methods: {
    openModalCreate() {
-      // Emitir um evento personalizado para indicar que o modal deve ser aberto
       this.$emit("open-modal");
     },
   }

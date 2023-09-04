@@ -98,6 +98,7 @@ export default {
             fontSize: 25,
             fontFamily: "Roboto",
           },
+          maintainAspectRatio: false
         },
       });
     },

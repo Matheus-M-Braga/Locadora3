@@ -10,6 +10,7 @@
       <v-row wrap class="table">
         <v-data-table
           dark
+          :loading="loadingTable"
           :headers="headers"
           :header-props="headerprops"
           :items="books"
@@ -189,6 +190,7 @@ export default {
       dialogDelete: false,
       bookId: null,
       nameExists: false,
+      loadingTable: false
     };
   },
   computed: {
@@ -249,6 +251,7 @@ export default {
     },
     // Listar
     fetchBooks() {
+      this.loadingTable = true
       Book.list()
         .then((response) => {
           this.books = response.data;
@@ -264,7 +267,10 @@ export default {
         })
         .catch((error) => {
           console.error("Erro na busca de livros", error);
-        });
+        })
+        .finally(() => {
+          this.loadingTable = false
+        })
     },
     fetchPubli() {
       Publisher.list().then((response) => {
