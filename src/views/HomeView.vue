@@ -1,35 +1,36 @@
 <template>
-    <v-container fluid class="pa-4">
-      <v-layout row justify-center>
-        <v-flex v-for="card in cards" :key="card.id" sm6 xs12 md6 lg4>
-          <v-card class="mr-3 mb-3 mb-4 mt-2" elevation="4" dark :loading="loadingCard">
-            <v-list-item>
-              <v-list-item-avatar tile="" class="mt-n7">
-                <v-sheet
-                  width="80"
-                  height="80"
-                  elevation="10"
-                >
-                  <v-icon dark large>{{ card.icon }}</v-icon>
-                </v-sheet>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <div class="title">{{ card.title }}</div>
-                <br /><br /><br />
-                <v-list-item-title class="mb-1">
-                  {{ card.value }}
-                </v-list-item-title>
-                <div><v-divider></v-divider></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-      </v-layout>
-      <v-layout row wrap justify-space-between>
-        <LineChart :loading="loadingChart"/>
-        <PieChart />
-      </v-layout>
-    </v-container>
+  <v-container fluid class="pa-4">
+    <v-layout row justify-center>
+      <v-flex v-for="card in cards" :key="card.id" sm6 xs12 md6 lg4>
+        <v-card
+          class="mr-3 mb-3 mb-4 mt-2"
+          elevation="4"
+          dark
+          :loading="loadingCard"
+        >
+          <v-list-item>
+            <v-list-item-avatar tile="" class="mt-n7">
+              <v-sheet width="80" height="80" elevation="10">
+                <v-icon dark large>{{ card.icon }}</v-icon>
+              </v-sheet>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <div class="title">{{ card.title }}</div>
+              <br /><br /><br />
+              <v-list-item-title class="mb-1">
+                {{ card.value }}
+              </v-list-item-title>
+              <div><v-divider></v-divider></div>
+            </v-list-item-content>
+          </v-list-item>
+        </v-card>
+      </v-flex>
+    </v-layout>
+    <v-layout row wrap justify-space-between>
+      <LineChart />
+      <PieChart />
+    </v-layout>
+  </v-container>
 </template>
 
 <script>
@@ -81,7 +82,6 @@ export default {
         value: "",
       },
     ],
-    loadingChart: false,
     loadingCard: false,
     books: [],
     availableBooks: 0,
@@ -123,21 +123,19 @@ export default {
         });
     },
     fetchAlugs() {
-      this.loadingChart = true
-      this.loadingCard = true
+      this.loadingCard = true;
       Rental.list()
         .then((response) => {
           this.rentals = response.data;
           this.CalcAlug();
           this.totalCalc();
-          this.updateCardValues()
+          this.updateCardValues();
         })
         .catch((error) => {
           console.error("Erro na busca de aluguéis", error);
         })
-        .finally(() =>{
-          this.loadingChart = false
-          this.loadingCard = false
+        .finally(() => {
+          this.loadingCard = false;
         });
     },
     fetchUsersPubli() {

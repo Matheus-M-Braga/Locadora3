@@ -1,5 +1,5 @@
 <template>
-  <v-card elevation="4" class="col-6">
+  <v-card elevation="4" class="col-6" :loading="loadingChart">
     <canvas ref="myChart" width="450" height="200" class="chartBar"></canvas>
   </v-card>
 </template>
@@ -13,6 +13,7 @@ export default {
     return {
       rentals: [],
       mostrented: [],
+      loadingChart: false
     };
   },
   mounted() {
@@ -28,6 +29,7 @@ export default {
   },
   methods: {
     listRentals() {
+      this.loadingChart = true
       Rental.list()
         .then((response) => {
           this.rentals = response.data;
@@ -35,6 +37,9 @@ export default {
         })
         .catch((error) => {
           console.error("Erro na busca de aluguéis", error);
+        })
+        .finally(() => {
+          this.loadingChart = false
         });
     },
     // Função pra reduzir as labels do gráfico de barra

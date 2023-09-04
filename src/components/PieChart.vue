@@ -1,5 +1,5 @@
 <template>
-  <v-card elevation="4" class="col-6">
+  <v-card elevation="4" class="col-6" :loading="loadingChart">
     <canvas ref="myPieChart" width="450" height="200" class="chartPie"></canvas>
   </v-card>
 </template>
@@ -12,6 +12,7 @@ export default {
   data() {
     return {
       rentals: [],
+      loadingChart: false
     };
   },
   mounted() {
@@ -32,8 +33,11 @@ export default {
       return `${yyyy}-${mm}-${dd}`;
     },
     async listStatus() {
+      this.loadingChart = true
       try {
-        const rentals = await Rentals.list();
+        const rentals = await Rentals.list().finally(() => {
+          this.loadingChart = false
+        });
         const status = {
           "No prazo": 0,
           Atrasado: 0,
