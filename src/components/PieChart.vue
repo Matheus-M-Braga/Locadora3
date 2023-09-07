@@ -6,7 +6,7 @@
 
 <script>
 import Chart from "chart.js";
-import Rentals from "@/services/rental";
+import Rental from "@/services/rental";
 
 export default {
   data() {
@@ -35,8 +35,8 @@ export default {
     async listStatus() {
       this.loadingChart = true
       try {
-        const rentals = await Rentals.list().finally(() => {
-
+        const rentals = await Rental.list().finally(() => {
+          this.loadingChart = false
         });
         const status = {
           "No prazo": 0,
@@ -59,11 +59,10 @@ export default {
         const statusCountArray = Object.entries(status);
         this.rentals = statusCountArray;
         this.updatePieChart();
+        
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
-      } finally {
-        this.loadingChart = false
-      }
+      } 
     },
     updatePieChart() {
       if (!this.rentals) return;

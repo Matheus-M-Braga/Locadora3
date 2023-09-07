@@ -13,6 +13,7 @@
           :loading="loadingTable"
           :headers="headers"
           :header-props="headerprops"
+          mobile-breakpoint="890"
           :items="books"
           :items-per-page="7"
           class="elevation-1"

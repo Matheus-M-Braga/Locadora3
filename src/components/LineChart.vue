@@ -28,19 +28,29 @@ export default {
     },
   },
   methods: {
-    listRentals() {
-      this.loadingChart = true;
-      Rental.list()
-        .then((response) => {
-          this.rentals = response.data;
-          this.sortRentals();
+    async listRentals(){
+      this.loadingChart = true
+      try {
+        this.rentals = await Rental.list().finally(() => {
+          this.loadingChart = false
         })
-        .catch((error) => {
-          console.error("Erro na busca de aluguéis", error);
-        })
-        .finally(() => {
-          this.loadingChart = false;
+        // Mais alugados
+        const RentalCount = {}
+        this.rentals.data.forEach((rental) => {
+          const bookname = rental.livro_id.nome;
+          if(RentalCount[bookname]){
+            RentalCount[bookname]++;
+          }
+          else {
+            RentalCount[bookname] = 1;
+          }
         });
+        this.mostrented = Object.keys(RentalCount)
+          .sort((a, b) => RentalCount[b] - RentalCount[a])
+          .map((bookname) => ({ bookname, quantidade: RentalCount[bookname] }));
+      } catch (error) {
+        console.error("Erro ao buscar informações:", error);
+      } 
     },
     // Função pra reduzir as labels do gráfico de barra
     truncateLabel(label) {
@@ -49,21 +59,6 @@ export default {
         return label.substring(0, maxLength) + "...";
       }
       return label;
-    },
-    sortRentals() {
-      // Mais alugados
-      const RentalCount = {};
-      this.rentals.forEach((rental) => {
-        const bookname = rental.livro_id.nome;
-        if (RentalCount[bookname]) {
-          RentalCount[bookname]++;
-        } else {
-          RentalCount[bookname] = 1;
-        }
-      });
-      this.mostrented = Object.keys(RentalCount)
-        .sort((a, b) => RentalCount[b] - RentalCount[a])
-        .map((bookname) => ({ bookname, quantidade: RentalCount[bookname] }));
     },
     updateBarChart() {
       const ctx = this.$refs.myChart.getContext("2d");
