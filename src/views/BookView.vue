@@ -121,9 +121,7 @@
             <span class="text-h5">Excluir Livro</span>
           </v-card-title>
           <v-card-text>
-            <v-container>
-              Tem certeza que deseja excluir o livro selecionado?
-            </v-container>
+            Tem certeza que deseja excluir o livro selecionado?
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -147,10 +145,12 @@ import Swal from "sweetalert2";
 import { validationMixin } from "vuelidate";
 import { required, maxLength } from "vuelidate/lib/validators";
 import TableTop from "@/components/TableTop.vue";
+
 export default {
   components: {
     TableTop,
   },
+
   mixins: [validationMixin],
   validations: {
     nome: { required },
@@ -190,7 +190,7 @@ export default {
       dialogDelete: false,
       bookId: null,
       nameExists: false,
-      loadingTable: false
+      loadingTable: false,
     };
   },
   computed: {
@@ -233,8 +233,8 @@ export default {
     },
   },
   mounted() {
-    this.fetchBooks();
-    this.fetchPubli();
+    this.listBooks();
+    this.listPubli();
   },
   methods: {
     updateSearch(newSearchValue) {
@@ -250,33 +250,45 @@ export default {
       );
     },
     // Listar
-    fetchBooks() {
-      this.loadingTable = true
-      Book.list()
-        .then((response) => {
-          this.books = response.data;
-          this.books.sort((a, b) => {
-            if (a.id > b.id) {
-              return 1;
-            } else if (a.id < b.id) {
-              return -1;
-            } else {
-              return 0;
-            }
-          });
-        })
-        .catch((error) => {
-          console.error("Erro na busca de livros", error);
-        })
-        .finally(() => {
-          this.loadingTable = false
-        })
+    async listBooks() {
+      this.loadingTable = true;
+      try {
+        const [booksResponse, publishersResponse] = await Promise.all([
+          Book.list(),
+          Publisher.list(),
+        ]);
+
+        this.listPublishers = publishersResponse.data.map((publisher) => ({
+          id: publisher.id,
+          nome: publisher.nome,
+        }));
+
+        this.books = booksResponse.data.map((book) => ({
+          id: book.id,
+          nome: book.nome,
+          autor: book.autor,
+          editora: book.editora,
+          lancamento: book.lancamento,
+          quantidade: book.quantidade,
+          totalalugado: book.totalalugado,
+        }));
+        // Ordem por id
+        this.books.sort((a, b) => {
+          if (a.id > b.id) {
+            return 1;
+          } else if (a.id < b.id) {
+            return -1;
+          } else {
+            return 0;
+          }
+        });
+      } catch (error) {
+        console.error("Erro ao buscar informações:", error);
+      } finally {
+        this.loadingTable = false;
+      }
     },
-    fetchPubli() {
-      Publisher.list().then((response) => {
-        this.listPublishers = response.data;
-      });
-    },
+
     CheckNames() {
       return this.books.some((book) => book.nome == this.nome);
     },
@@ -313,6 +325,7 @@ export default {
       this.editora = selectedPubli;
       this.lancamento = book.lancamento;
       this.quantidade = book.quantidade;
+      this.totalalugado = book.totalalugado;
     },
     // Fechar modal
     closeModal() {
@@ -346,7 +359,7 @@ export default {
                   timer: 3500,
                 });
                 this.closeModal();
-                this.fetchBooks();
+                this.listBooks();
               })
               .catch((error) => {
                 console.error("Erro ao adicionar o livro:", error);
@@ -371,6 +384,7 @@ export default {
               editora: selectedPubli ? { ...selectedPubli } : this.editora,
               lancamento: this.lancamento,
               quantidade: this.quantidade,
+              totalalugado: this.totalalugado,
             };
             Book.update(editedbook)
               .then(() => {
@@ -388,7 +402,7 @@ export default {
                   timer: 3500,
                 });
                 this.closeModal();
-                this.fetchBooks();
+                this.listBooks();
               })
               .catch((error) => {
                 console.error("Erro ao atualizar livro:", error);
@@ -434,7 +448,7 @@ export default {
               showConfirmButton: false,
               timer: 3500,
             });
-            this.removerLivroDaLista(deletedbook.id);
+            this.listBooks();
             this.closeModalDelete();
           }
         })
@@ -449,9 +463,6 @@ export default {
           });
           this.closeModalDelete();
         });
-    },
-    removerLivroDaLista(bookId) {
-      this.books = this.books.filter((book) => book.id !== bookId);
     },
   },
 };

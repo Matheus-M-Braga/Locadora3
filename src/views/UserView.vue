@@ -97,7 +97,9 @@
               <v-btn color="red darken-1" text @click="closeModal">
                 Cancelar
               </v-btn>
-              <v-btn color="blue darken-1" text @click="confirm"> Salvar </v-btn>
+              <v-btn color="blue darken-1" text @click="confirm">
+                Salvar
+              </v-btn>
             </v-card-actions>
           </v-card>
         </v-form>
@@ -111,9 +113,7 @@
             <span class="text-h5">Excluir Usuário</span>
           </v-card-title>
           <v-card-text>
-            <v-container>
-              Tem certeza que deseja excluir o usuário selecionado?
-            </v-container>
+            Tem certeza que deseja excluir o usuário selecionado?
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -175,11 +175,8 @@ export default {
       dialogDelete: false,
       userId: null,
       emailExists: false,
-      loadingTable: false
+      loadingTable: false,
     };
-  },
-  mounted() {
-    this.fetchUsers();
   },
   computed: {
     // validacao
@@ -213,6 +210,9 @@ export default {
       return errors;
     },
   },
+  mounted() {
+    this.listUsers();
+  },
   methods: {
     updateSearch(newSearchValue) {
       this.search = newSearchValue;
@@ -227,27 +227,33 @@ export default {
       );
     },
     // Listar
-    fetchUsers() {
-      this.loadingTable = true
-      User.list()
-        .then((response) => {
-          this.users = response.data;
-          this.users.sort((a, b) => {
-            if (a.id > b.id) {
-              return 1;
-            } else if (a.id < b.id) {
-              return -1;
-            } else {
-              return 0;
-            }
-          });
-        })
-        .catch((error) => {
-          console.error("Erro ao buscar usuarios", error);
-        })
-        .finally(() => {
-          this.loadingTable = false
-        })
+    async listUsers() {
+      this.loadingTable = true;
+      try {
+        const [usersResponse] = await Promise.all([User.list()]);
+
+        this.users = usersResponse.data.map((user) => ({
+          id: user.id,
+          nome: user.nome,
+          cidade: user.cidade,
+          endereco: user.endereco,
+          email: user.email,
+        }));
+        // Ordem por id
+        this.users.sort((a, b) => {
+          if (a.id > b.id) {
+            return 1;
+          } else if (a.id < b.id) {
+            return -1;
+          } else {
+            return 0;
+          }
+        });
+      } catch (error) {
+        console.error("Erro ao buscar informações:", error);
+      } finally {
+        this.loadingTable = false;
+      }
     },
     // Emails já cadastrados
     CheckEmails() {
@@ -392,8 +398,8 @@ export default {
               showConfirmButton: false,
               timer: 3500,
             });
-            this.removerUsuarioDaLista(deleteduser.id);
-            this.dialogDelete = false;
+            this.listUsers();
+            this.closeModalDelete();
           } else {
             Swal.fire({
               icon: "error",
@@ -414,9 +420,6 @@ export default {
           });
           this.closeModalDelete();
         });
-    },
-    removerUsuarioDaLista(userId) {
-      this.users = this.users.filter((user) => user.id !== userId);
     },
   },
 };

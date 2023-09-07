@@ -91,9 +91,7 @@
             <span class="text-h5">Excluir Editora</span>
           </v-card-title>
           <v-card-text>
-            <v-container>
-              Tem certeza que deseja excluir a editora selecionada?
-            </v-container>
+            Tem certeza que deseja excluir a editora selecionada?
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -118,9 +116,9 @@ import { required } from "vuelidate/lib/validators";
 import TableTop from "@/components/TableTop.vue";
 
 export default {
-components: {
-  TableTop,
-},
+  components: {
+    TableTop,
+  },
   mixins: [validationMixin],
   validations: {
     nome: { required },
@@ -148,11 +146,8 @@ components: {
       dialogDelete: false,
       publisherId: null,
       nameExists: false,
-      loadingTable: false
+      loadingTable: false,
     };
-  },
-  mounted() {
-    this.fetchPubli();
   },
   computed: {
     // validacao
@@ -172,6 +167,9 @@ components: {
       return errors;
     },
   },
+  mounted() {
+    this.listPubli();
+  },
   methods: {
     updateSearch(newSearchValue) {
       this.search = newSearchValue;
@@ -186,27 +184,31 @@ components: {
       );
     },
     // Listar
-    fetchPubli() {
-      this.loadingTable = true
-      Publisher.list()
-        .then((response) => {
-          this.publishers = response.data;
-          this.publishers.sort((a, b) => {
-            if (a.id > b.id) {
-              return 1;
-            } else if (a.id < b.id) {
-              return -1;
-            } else {
-              return 0;
-            }
-          });
-        })
-        .catch((error) => {
-          console.error("Erro ao buscar editoras:", error);
-        })
-        .finally(() => {
-          this.loadingTable = false
-        })
+    async listPubli() {
+      this.loadingTable = true;
+      try {
+        const [publisherResponse] = await Promise.all([Publisher.list()]);
+
+        this.publishers = publisherResponse.data.map((publisher) => ({
+          id: publisher.id,
+          nome: publisher.nome,
+          cidade: publisher.cidade,
+        }))
+        // Ordem por id
+        this.publishers.sort((a, b) => {
+          if (a.id > b.id) {
+            return 1;
+          } else if (a.id < b.id) {
+            return -1;
+          } else {
+            return 0;
+          }
+        });
+      } catch (error) {
+        console.error("Erro ao buscar informações:", error);
+      } finally {
+        this.loadingTable = false;
+      }
     },
     CheckNames() {
       return this.publishers.some((publisher) => publisher.nome == this.nome);
@@ -335,7 +337,7 @@ components: {
               showConfirmButton: false,
               timer: 3500,
             });
-            this.removeFromList(deletedpublisher.id);
+            this.listPubli();
           } else {
             Swal.fire({
               icon: "error",
@@ -357,11 +359,6 @@ components: {
           this.closeModalDelete();
         });
       this.dialogDelete = false;
-    },
-    removeFromList(publisherId) {
-      this.publishers = this.publishers.filter(
-        (publisher) => publisher.id !== publisherId
-      );
     },
   },
 };

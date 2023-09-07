@@ -129,9 +129,7 @@
             <span class="text-h5">Excluir Aluguel</span>
           </v-card-title>
           <v-card-text>
-            <v-container>
-              Tem certeza que deseja excluir o item selecionado?
-            </v-container>
+            Tem certeza que deseja excluir o item selecionado?
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -152,11 +150,7 @@
           <v-card-title>
             <span class="text-h5">Devolver Livro</span>
           </v-card-title>
-          <v-card-text>
-            <v-container>
-              Tem certeza que deseja devolver o livro?
-            </v-container>
-          </v-card-text>
+          <v-card-text>Tem certeza que deseja devolver o livro? </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="red darken-1" text @click="closeModalDevol">
@@ -180,6 +174,7 @@ import Swal from "sweetalert2";
 import { validationMixin } from "vuelidate";
 import { required } from "vuelidate/lib/validators";
 import TableTop from "@/components/TableTop";
+
 export default {
   components: {
     TableTop,
@@ -198,7 +193,6 @@ export default {
       search: "",
       ModalTitle: "",
       PageTitle: "Aluguéis",
-
       headers: [
         { text: "ID", value: "id" },
         { text: "Livro", align: "start", value: "livro_id" },
@@ -225,7 +219,7 @@ export default {
       dialogDelete: false,
       dialogDevol: false,
       rentalId: null,
-      loadingTable: false
+      loadingTable: false,
     };
   },
   computed: {
@@ -316,7 +310,7 @@ export default {
     },
     // Pegar data atual
     getDate() {
-      const brazilTimeZoneOffset = -3 * 60; // Fuso horário do Brasil em minutos (UTC -3)
+      const brazilTimeZoneOffset = -3 * 60;
       const currentUTCDate = new Date();
       const brazilCurrentDate = new Date(
         currentUTCDate.getTime() + brazilTimeZoneOffset * 60 * 1000
@@ -325,7 +319,7 @@ export default {
     },
     // Listar
     async listAlugs() {
-      this.loadingTable = true
+      this.loadingTable = true;
       try {
         const [booksResponse, rentalsResponse, usersResponse] =
           await Promise.all([Book.list(), Rental.list(), User.list()]);
@@ -378,7 +372,7 @@ export default {
       } catch (error) {
         console.error("Erro ao buscar informações:", error);
       } finally {
-        this.loadingTable = false
+        this.loadingTable = false;
       }
     },
     // Abrir o modal para adicionar
@@ -475,7 +469,7 @@ export default {
               showConfirmButton: false,
               timer: 3500,
             });
-            this.removeRental(deleteAlug.id);
+            this.listAlugs();
             this.closeModalDelete();
           } else {
             Swal.fire({
@@ -498,9 +492,7 @@ export default {
           this.closeModalDelete();
         });
     },
-    removeRental(rentalId) {
-      this.rentals = this.rentals.filter((rental) => rental.id !== rentalId);
-    },
+
     // Devolução
     openModalDevol(rental) {
       this.update = { ...rental };
