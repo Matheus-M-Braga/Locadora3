@@ -35,44 +35,12 @@ import Rental from "@/services/rental";
 export default {
   data: () => ({
     cards: [
-      {
-        id: 1,
-        title: "Último livro alugado",
-        icon: "mdi-book-sync",
-        value: "",
-      },
-      {
-        id: 2,
-        title: "Livros disponíveis",
-        icon: "mdi-book-check",
-        value: "",
-      },
-      {
-        id: 3,
-        title: "Livros alugados",
-        icon: "mdi-book-open-variant",
-        value: "",
-      },
-      {
-        id: 4,
-        title: "Total de Aluguéis",
-        icon: "mdi-book-account",
-        value: "",
-      },
-      {
-        id: 5,
-        title: "Usuários cadastrados",
-        color: "blue-grey darken-2",
-        icon: "mdi-account",
-        value: "",
-      },
-      {
-        id: 6,
-        title: "Editoras cadastradas",
-        color: "blue-grey darken-2",
-        icon: "mdi-pencil",
-        value: "",
-      },
+      { id: 1, title: "Último livro alugado", icon: "mdi-book-sync", value: "", },
+      { id: 2, title: "Livros disponíveis", icon: "mdi-book-check", value: "", },
+      { id: 3, title: "Livros alugados", icon: "mdi-book-open-variant",value: "", },
+      { id: 4, title: "Total de Aluguéis", icon: "mdi-book-account", value: "", },
+      { id: 5, title: "Usuários cadastrados", color: "blue-grey darken-2", icon: "mdi-account",value: "", },
+      { id: 6, title: "Editoras cadastradas", color: "blue-grey darken-2", icon: "mdi-pencil", value: "", },
     ],
     loadingCard: false,
     books: [],
@@ -87,9 +55,9 @@ export default {
     lastRented: "",
   }),
   mounted() {
-    this.fetchBooks();
-    this.fetchAlugs();
-    this.fetchUsersPubli();
+    this.listBooks();
+    this.listAlugs();
+    this.listUsersPubli();
   },
   components: {
     LineChart,
@@ -104,7 +72,7 @@ export default {
       this.cards[4].value = this.users;
       this.cards[5].value = this.publis;
     },
-    fetchBooks() {
+    listBooks() {
       Book.list()
         .then((response) => {
           this.books = response.data;
@@ -114,7 +82,7 @@ export default {
           console.error("Erro na busca de livros", error);
         });
     },
-    fetchAlugs() {
+    listAlugs() {
       this.loadingCard = true;
       Rental.list()
         .then((response) => {
@@ -130,7 +98,7 @@ export default {
           this.loadingCard = false;
         });
     },
-    fetchUsersPubli() {
+    listUsersPubli() {
       User.list().then((response) => {
         this.Listusers = response.data;
         this.users = this.Listusers.length;
