@@ -7,7 +7,6 @@
       v-model="isDrawerOpen"
       class="sidebar"
     >
-      <!-- links -->
       <v-list>
         <v-list-item>
           <v-layout flex class="header_side">

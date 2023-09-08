@@ -36,7 +36,7 @@ export default {
       this.loadingChart = true
       try {
         const rentals = await Rental.list().finally(() => {
-          this.loadingChart = false
+
         });
         const status = {
           "No prazo": 0,
@@ -59,7 +59,7 @@ export default {
         const statusCountArray = Object.entries(status);
         this.rentals = statusCountArray;
         this.updatePieChart();
-        
+        this.loadingChart = false
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
       } 

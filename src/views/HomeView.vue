@@ -3,30 +3,22 @@
     <v-layout row justify-center>
       <v-flex v-for="card in cards" :key="card.id" sm6 xs12 md6 lg4>
         <v-card
-          class="mr-3 mb-3 mb-4 mt-2"
+          class="ma-2"
           elevation="4"
           dark
           :loading="loadingCard"
         >
-          <v-list-item>
-            <v-list-item-avatar tile="" class="mt-n7">
-              <v-sheet width="80" height="80" elevation="10">
-                <v-icon dark large>{{ card.icon }}</v-icon>
-              </v-sheet>
-            </v-list-item-avatar>
-            <v-list-item-content>
-              <div class="title">{{ card.title }}</div>
-              <br /><br /><br />
-              <v-list-item-title class="mb-1">
-                {{ card.value }}
-              </v-list-item-title>
-              <div><v-divider></v-divider></div>
-            </v-list-item-content>
-          </v-list-item>
+          <v-card-title>
+            <v-icon left large>{{ card.icon }}</v-icon>
+            {{ card.title }}
+          </v-card-title>
+          <v-card-text class="text-subtitle-1">
+            {{ card.value }}
+          </v-card-text>
         </v-card>
       </v-flex>
     </v-layout>
-    <v-layout row wrap justify-space-between>
+    <v-layout row wrap justify-space-around class="mt-6">
       <LineChart />
       <PieChart />
     </v-layout>
