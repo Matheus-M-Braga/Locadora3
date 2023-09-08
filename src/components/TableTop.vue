@@ -16,7 +16,7 @@
       label="Pesquisar"
       outlined
       prepend-inner-icon="mdi-magnify"
-      filled
+      filled 
     ></v-text-field>
   </v-toolbar>
 </template>

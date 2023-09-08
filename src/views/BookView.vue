@@ -235,7 +235,6 @@ export default {
   },
   mounted() {
     this.listBooks();
-    this.listPubli();
   },
   methods: {
     updateSearch(newSearchValue) {
@@ -289,7 +288,6 @@ export default {
         this.loadingTable = false;
       }
     },
-
     CheckNames() {
       return this.books.some((book) => book.nome == this.nome);
     },

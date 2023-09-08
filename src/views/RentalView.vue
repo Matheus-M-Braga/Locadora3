@@ -156,7 +156,7 @@
             <v-btn color="red darken-1" text @click="closeModalDevol">
               Cancelar
             </v-btn>
-            <v-btn color="green darken-1" text @click="confirmDevol">
+            <v-btn color="green darken-1" text @click="confirmDevol(update)">
               Confirmar
             </v-btn>
           </v-card-actions>
@@ -492,12 +492,10 @@ export default {
           this.closeModalDelete();
         });
     },
-
     // Devolução
     openModalDevol(rental) {
+      this.dialogDevol = true;
       this.update = { ...rental };
-      this.confirmDevol(this.update);
-      this.closeModalDevol();
     },
     confirmDevol(rental) {
       const selectedBook = this.listBooks.find(
@@ -531,7 +529,6 @@ export default {
           });
           this.closeModalDevol();
           this.listAlugs();
-          this.removeRental(returnedRental.id);
         })
         .catch((error) => {
           console.error("Erro ao devolver aluguel:", error);

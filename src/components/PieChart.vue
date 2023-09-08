@@ -42,7 +42,7 @@ export default {
           "No prazo": 0,
           Atrasado: 0,
           Pendente: 0,
-        };
+        }; 
         rentals.data.forEach((rental) => {
           if (rental.data_devolucao != null) {
             const devolucaoDate = this.parseDate(rental.data_devolucao);
