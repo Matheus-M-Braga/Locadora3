@@ -302,11 +302,11 @@ export default {
                 this.closeModal();
               })
               .catch((error) => {
-                console.error("Erro ao atualizar editora:", error);
+                console.error("Erro ao atualizar editora:", error.response);
                 Swal.fire({
                   icon: "error",
                   title: "Erro ao atualizar editora.",
-                  text: error.response.data.error,
+                  text: error.response.data.data.message,
                   showConfirmButton: false,
                   timer: 3500,
                 });
@@ -355,7 +355,7 @@ export default {
           Swal.fire({
             icon: "error",
             title: "Erro ao deletar editora.",
-            text: e.response.data.error,
+            text: e.response.data.message,
             showConfirmButton: false,
             timer: 3500,
           });

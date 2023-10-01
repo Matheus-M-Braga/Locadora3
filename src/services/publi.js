@@ -8,9 +8,9 @@ export default {
     return axios.post("publishers", publisher);
   },
   update: (publisher) => {
-    return axios.put("publishers/", publisher);
+    return axios.put(`publishers/${publisher.id}`, publisher);
   },
   delete: (publisher) => {
-    return axios.delete("publishers/", { publisher });
+    return axios.delete(`publishers/${publisher.id}`, { publisher });
   },
 };
