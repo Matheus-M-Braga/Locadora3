@@ -33,11 +33,13 @@ export default {
       try {
         this.rentals = await Rental.list().finally(() => {
           this.loadingChart = false
+          
         })
+        const result = this.rentals.data;
         // Mais alugados
         const RentalCount = {}
-        this.rentals.data.forEach((rental) => {
-          const bookname = rental.livro_id.nome;
+        result.data.forEach((rental) => {
+          const bookname = rental.book.name;
           if(RentalCount[bookname]){
             RentalCount[bookname]++;
           }
@@ -47,7 +49,7 @@ export default {
         });
         this.mostrented = Object.keys(RentalCount)
           .sort((a, b) => RentalCount[b] - RentalCount[a])
-          .map((bookname) => ({ bookname, quantidade: RentalCount[bookname] }));
+          .map((bookname) => ({ bookname, quantity: RentalCount[bookname] }));
       } catch (error) {
         console.error("Erro ao buscar informações:", error);
       } 
@@ -64,8 +66,7 @@ export default {
       const ctx = this.$refs.myChart.getContext("2d");
       const topFour = this.mostrented.slice(0, 4);
       const labels = topFour.map((item) => this.truncateLabel(item.bookname));
-      const data = topFour.map((item) => item.quantidade);
-      console.log(data);
+      const data = topFour.map((item) => item.quantity);
       new Chart(ctx, {
         type: "bar",
         data: {

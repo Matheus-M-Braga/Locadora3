@@ -12,7 +12,7 @@
     <v-text-field
       v-model="localSearch"
       dense
-      hide-details
+      hide-details 
       label="Pesquisar"
       outlined
       prepend-inner-icon="mdi-magnify"
