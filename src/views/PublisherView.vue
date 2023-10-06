@@ -170,7 +170,7 @@ export default {
     },
   },
   mounted() {
-    this.listPubli();
+    this.getPublishers();
   },
   methods: {
     updateSearch(newSearchValue) {
@@ -186,26 +186,18 @@ export default {
       );
     },
     // Listar
-    async listPubli() {
+    async getPublishers() {
       this.loadingTable = true;
       try {
-        const [publisherResponse] = await Promise.all([Publisher.list()]);
-        const data = publisherResponse.data;
+        const [publisherResponse] = await Promise.all([
+          Publisher.list({ Page: 1, PageSize: 15 }),
+        ]);
+        const data = publisherResponse.data.response;
         this.publishers = data.data.map((publisher) => ({
           id: publisher.id,
           name: publisher.name,
           city: publisher.city,
-        }))
-        // Ordem por id
-        this.publishers.sort((a, b) => {
-          if (a.id > b.id) {
-            return 1;
-          } else if (a.id < b.id) {
-            return -1;
-          } else {
-            return 0;
-          }
-        });
+        }));
       } catch (error) {
         console.error("Erro ao buscar informações:", error);
       } finally {
@@ -264,7 +256,7 @@ export default {
                   timer: 3500,
                 });
                 this.closeModal();
-                this.listPubli();
+                this.getPublishers();
               })
               .catch((error) => {
                 console.error("Erro ao adicionar editora:", error);
@@ -300,13 +292,14 @@ export default {
                   timer: 3500,
                 });
                 this.closeModal();
+                this.getPublishers();
               })
               .catch((error) => {
-                console.error("Erro ao atualizar editora:", error.response);
+                console.error("Erro ao atualizar editora:", error);
                 Swal.fire({
                   icon: "error",
                   title: "Erro ao atualizar editora.",
-                  text: error.response.data.data.message,
+                  text: error.response.data.message,
                   showConfirmButton: false,
                   timer: 3500,
                 });
@@ -340,7 +333,7 @@ export default {
               showConfirmButton: false,
               timer: 3500,
             });
-            this.listPubli();
+            this.getPublishers();
           } else {
             Swal.fire({
               icon: "error",
@@ -352,6 +345,7 @@ export default {
         })
         .catch((e) => {
           console.error("Erro ao deletar a editora:", e);
+          console.log(e.response);
           Swal.fire({
             icon: "error",
             title: "Erro ao deletar editora.",

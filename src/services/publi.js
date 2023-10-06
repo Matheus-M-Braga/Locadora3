@@ -1,8 +1,13 @@
 import axios from "./config";
 
 export default {
-  list: () => {
-    return axios.get("publishers");
+  list: (params) => {
+    return axios.get("publishers", {
+      params: {
+        Page: params.Page,
+        PageSize: params.PageSize,
+      },
+    });
   },
   create: (publisher) => {
     return axios.post("publishers", publisher);
