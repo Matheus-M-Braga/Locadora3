@@ -1,21 +1,16 @@
 import axios from "./config";
 
 export default {
-  list: (params) => {
-    return axios.get("publishers", {
-      params: {
-        Page: params.Page,
-        PageSize: params.PageSize,
-      },
-    });
+  list: () => {
+    return axios.get("editoras");
   },
-  create: (publisher) => {
-    return axios.post("publishers", publisher);
+  create: (editora) => {
+    return axios.post("editora", editora);
   },
-  update: (publisher) => {
-    return axios.put(`publishers/${publisher.id}`, publisher);
+  update: (editora) => {
+    return axios.put("editora/", editora);
   },
-  delete: (publisher) => {
-    return axios.delete(`publishers/${publisher.id}`, { publisher });
+  delete: (editora) => {
+    return axios.delete('editora', { data : editora });
   },
 };

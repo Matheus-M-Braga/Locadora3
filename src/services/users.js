@@ -2,15 +2,15 @@ import axios from "./config";
 
 export default {
   list: () => {
-    return axios.get("users");
+    return axios.get("usuarios");
   },
-  create: (user) => {
-    return axios.post("users", user);
+  create: (usuario) => {
+    return axios.post("usuario", usuario);
   },
-  update: (user) => {
-    return axios.put("users/", user);
+  update: (usuario) => {
+    return axios.put("usuario/", usuario);
   },
-  delete: (user) => {
-    return axios.delete("users", { data: user });
+  delete: (usuario) => {
+    return axios.delete('usuario', { data : usuario });
   },
 };

@@ -2,15 +2,15 @@ import axios from "./config";
 
 export default {
   list: () => {
-    return axios.get("/books");
+    return axios.get("/livros");
   },
-  create: (book) => {
-    return axios.post("/books", book);
+  create: (livro) => {
+    return axios.post("/livro", livro);
   },
-  update: (book) => {
-    return axios.put("/books/", book);
+  update: (livro) => {
+    return axios.put("/livro/", livro);
   },
-  delete: (book) => {
-    return axios.delete('books', { data : book });
+  delete: (livro) => {
+    return axios.delete('livro', { data : livro });
   },
 };

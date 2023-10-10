@@ -1,15 +1,15 @@
 import axios from './config'
 export default {
    list: () => {
-     return axios.get("rentals");
+     return axios.get("alugueis");
    },
    create: (aluguel) => {
-     return axios.post("/rentals", aluguel);
+     return axios.post("/aluguel", aluguel);
    },
    update: (aluguel) => {
-     return axios.put(`/rentals`, aluguel);
+     return axios.put(`/aluguel`, aluguel);
    },
    delete: (aluguel) => {
-     return axios.delete("rentals", { data: aluguel });
+     return axios.delete("aluguel", { data: aluguel });
    },
  };

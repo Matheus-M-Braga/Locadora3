@@ -43,11 +43,10 @@ export default {
           Atrasado: 0,
           Pendente: 0,
         }; 
-        const result = rentals.data;
-        result.data.forEach((rental) => {
-          if (rental.returnDate != null) {
-            const devolucaoDate = this.parseDate(rental.returnDate);
-            const previsaoDate = this.parseDate(rental.forecastDate);
+        rentals.data.forEach((rental) => {
+          if (rental.data_devolucao != null) {
+            const devolucaoDate = this.parseDate(rental.data_devolucao);
+            const previsaoDate = this.parseDate(rental.data_previsao);
             if (devolucaoDate > previsaoDate) {
               status["Atrasado"]++;
             } else {
