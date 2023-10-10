@@ -62,50 +62,50 @@
             <v-col>
               <v-col cols="12">
                 <v-select
-                  v-model="livro_id"
+                  v-model="book"
                   :items="listBooks"
-                  item-text="nome"
+                  item-text="name"
                   label="Livro"
                   required
                   :error-messages="BookError"
-                  @input="$v.livro_id.$touch()"
-                  @blur="$v.livro_id.$touch()"
+                  @input="$v.book.$touch()"
+                  @blur="$v.book.$touch()"
                 ></v-select>
               </v-col>
               <v-col cols="12">
                 <v-select
-                  v-model="usuario_id"
+                  v-model="user"
                   :items="listUsers"
-                  item-text="nome"
+                  item-text="name"
                   label="Usuário"
                   required
                   :error-messages="UserError"
-                  @input="$v.usuario_id.$touch()"
-                  @blur="$v.usuario_id.$touch()"
+                  @input="$v.user.$touch()"
+                  @blur="$v.user.$touch()"
                 ></v-select>
               </v-col>
               <v-col cols="12">
                 <v-text-field
                   disabled
-                  v-model="data_aluguel"
+                  v-model="rentalDate"
                   label="Data do Aluguel (Hoje)"
                   required
                   :error-messages="AlugError"
-                  @input="$v.data_aluguel.$touch()"
-                  @blur="$v.data_aluguel.$touch()"
+                  @input="$v.rentalDate.$touch()"
+                  @blur="$v.rentalDate.$touch()"
                   type="date"
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
                 <v-text-field
-                  v-model="data_previsao"
+                  v-model="forecastDate"
                   label="Previsão de Devolução"
                   required
                   :error-messages="DevolError"
-                  @input="$v.data_previsao.$touch()"
-                  @blur="$v.data_previsao.$touch()"
+                  @input="$v.forecastDate.$touch()"
+                  @blur="$v.forecastDate.$touch()"
                   type="date"
-                  :min="data_aluguel"
+                  :min="rentalDate"
                   :max="MaxDate()"
                 ></v-text-field>
               </v-col>
@@ -182,10 +182,10 @@ export default {
 
   mixins: [validationMixin],
   validations: {
-    livro_id: { required },
-    usuario_id: { required },
-    data_aluguel: { required },
-    data_previsao: { required },
+    book: { required },
+    user: { required },
+    rentalDate: { required },
+    forecastDate: { required },
   },
   data() {
     return {
@@ -195,11 +195,11 @@ export default {
       PageTitle: "Aluguéis",
       headers: [
         { text: "ID", value: "id" },
-        { text: "Livro", align: "start", value: "livro_id" },
-        { text: "Usuário", value: "usuario_id" },
-        { text: "Data do Aluguel", value: "data_aluguel" },
-        { text: "Previsão de Devolução", value: "data_previsao" },
-        { text: "Data de Devolução", value: "data_devolucao" },
+        { text: "Livro", align: "start", value: "book" },
+        { text: "Usuário", value: "user" },
+        { text: "Data do Aluguel", value: "rentalDate" },
+        { text: "Previsão de Devolução", value: "forecastDate" },
+        { text: "Data de Devolução", value: "returnDate" },
         { text: "Status", value: "status" },
         { text: "Ações", value: "acoes", sortable: false },
       ],
@@ -209,11 +209,11 @@ export default {
       rentals: [],
       listBooks: [],
       listUsers: [],
-      livro_id: "",
-      usuario_id: "",
-      data_aluguel: "",
-      data_previsao: "",
-      data_devolucao: "",
+      book: "",
+      user: "",
+      rentalDate: "",
+      forecastDate: "",
+      returnDate: "",
       status: "",
       dialog: false,
       dialogDelete: false,
@@ -223,30 +223,28 @@ export default {
     };
   },
   computed: {
-    // validacao
     BookError() {
       const errors = [];
-      if (!this.$v.livro_id.$dirty) return errors;
-      !this.$v.livro_id.required && errors.push("Informe o livro.");
+      if (!this.$v.book.$dirty) return errors;
+      !this.$v.book.required && errors.push("Informe o livro.");
       return errors;
     },
     UserError() {
       const errors = [];
-      if (!this.$v.usuario_id.$dirty) return errors;
-      !this.$v.usuario_id.required && errors.push("Informe o usuário.");
+      if (!this.$v.user.$dirty) return errors;
+      !this.$v.user.required && errors.push("Informe o usuário.");
       return errors;
     },
     AlugError() {
       const errors = [];
-      if (!this.$v.data_aluguel.$dirty) return errors;
-      !this.$v.data_aluguel.required &&
-        errors.push("Informe a data do aluguel.");
+      if (!this.$v.rentalDate.$dirty) return errors;
+      !this.$v.rentalDate.required && errors.push("Informe a data do aluguel.");
       return errors;
     },
     DevolError() {
       const errors = [];
-      if (!this.$v.data_previsao.$dirty) return errors;
-      !this.$v.data_previsao.required &&
+      if (!this.$v.forecastDate.$dirty) return errors;
+      !this.$v.forecastDate.required &&
         errors.push("Informe a previsão de devolução.");
       return errors;
     },
@@ -270,14 +268,12 @@ export default {
     updateSearch(newSearchValue) {
       this.search = newSearchValue;
     },
-    // Calcula a data limite
     MaxDate() {
       const today = new Date();
       const futureDate = new Date(today);
       futureDate.setDate(today.getDate() + 30);
       return futureDate.toISOString().substr(0, 10);
     },
-    // Classe do v-chip
     statusClass(item) {
       if (item.status == "Atrasado") {
         return "red";
@@ -287,7 +283,6 @@ export default {
         return "yellow";
       }
     },
-    // Formatar datas
     formatDate(dateString) {
       const utcDate = new Date(dateString);
       const localDate = new Date(
@@ -301,14 +296,12 @@ export default {
       };
       return localDate.toLocaleDateString("pt-BR", options);
     },
-    // Converter para o padrão da API
     parseDate(date) {
       if (!date) return null;
 
       const [day, month, year] = date.split("/");
       return `${year}-${month}-${day}`;
     },
-    // Pegar data atual
     getDate() {
       const brazilTimeZoneOffset = -3 * 60;
       const currentUTCDate = new Date();
@@ -317,26 +310,28 @@ export default {
       );
       return brazilCurrentDate.toISOString().substr(0, 10);
     },
-    // Listar
     async listAlugs() {
       this.loadingTable = true;
       try {
         const [booksResponse, rentalsResponse, usersResponse] =
           await Promise.all([Book.list(), Rental.list(), User.list()]);
+        const data = rentalsResponse.data;
+        const dataBook = booksResponse.data;
+        const dataUser = usersResponse.data;
 
-        this.listBooks = booksResponse.data.map((livro) => ({
+        this.listBooks = dataBook.data.map((livro) => ({
           id: livro.id,
-          nome: livro.nome,
+          name: livro.name,
         }));
 
-        this.listUsers = usersResponse.data.map((usuario) => ({
+        this.listUsers = dataUser.data.map((usuario) => ({
           id: usuario.id,
-          nome: usuario.nome,
+          name: usuario.name,
         }));
 
-        this.rentals = rentalsResponse.data.map((rental) => {
-          const devolucaoDate = rental.data_devolucao;
-          const previsaoDate = rental.data_previsao;
+        this.rentals = data.data.map((rental) => {
+          const devolucaoDate = rental.returnDate;
+          const previsaoDate = rental.forecastDate;
           let statusInfo;
           if (devolucaoDate !== null) {
             if (devolucaoDate > previsaoDate) {
@@ -349,12 +344,12 @@ export default {
           }
           return {
             id: rental.id,
-            livro_id: rental.livro_id.nome,
-            usuario_id: rental.usuario_id.nome,
-            data_aluguel: this.formatDate(rental.data_aluguel),
-            data_previsao: this.formatDate(rental.data_previsao),
-            data_devolucao: rental.data_devolucao
-              ? this.formatDate(rental.data_devolucao)
+            book: rental.book.name,
+            user: rental.user.name,
+            rentalDate: this.formatDate(rental.rentalDate),
+            forecastDate: this.formatDate(rental.forecastDate),
+            returnDate: rental.returnDate
+              ? this.formatDate(rental.returnDate)
               : "...",
             status: statusInfo,
           };
@@ -375,40 +370,37 @@ export default {
         this.loadingTable = false;
       }
     },
-    // Abrir o modal para adicionar
     openModalCreate() {
       this.ModalTitle = "Adicionar Aluguel";
       this.dialog = true;
       this.$v.$reset();
 
-      this.livro_id = "";
-      this.usuario_id = "";
-      this.data_aluguel = this.getDate();
-      this.data_previsao = "";
-      this.data_devolucao = "";
+      this.book = "";
+      this.user = "";
+      this.rentalDate = this.getDate();
+      this.forecastDate = "";
+      this.returnDate = "";
     },
-    // Fechar modal
     closeModal() {
       this.dialog = false;
     },
-    // confirm
     confirm() {
       this.$v.$touch();
       if (!this.$v.$error) {
         // Identifica qual modal foi ativado (Add)
         if (this.ModalTitle === "Adicionar Aluguel") {
           const selectedBook = this.listBooks.find(
-            (livro) => livro.nome === this.livro_id
+            (livro) => livro.name === this.book
           );
           const selectedUser = this.listUsers.find(
-            (usuario) => usuario.nome === this.usuario_id
+            (usuario) => usuario.name === this.user
           );
 
           const novoAlug = {
-            livro_id: selectedBook,
-            usuario_id: selectedUser,
-            data_aluguel: this.data_aluguel,
-            data_previsao: this.data_previsao,
+            book: selectedBook,
+            user: selectedUser,
+            rentalDate: this.rentalDate,
+            forecastDate: this.forecastDate,
           };
           Rental.create(novoAlug)
             .then((response) => {
@@ -435,7 +427,6 @@ export default {
         }
       }
     },
-    // Excluir
     openModalDelete(rental) {
       this.update = { ...rental };
       this.dialogDelete = true;
@@ -445,19 +436,18 @@ export default {
     },
     confirmDelete(rental) {
       const selectedBook = this.listBooks.find(
-        (book) => book.nome === rental.livro_id
+        (book) => book.name === rental.book
       );
       const selectedUser = this.listUsers.find(
-        (user) => user.nome === rental.usuario_id
+        (user) => user.name === rental.user
       );
       const deleteAlug = {
         id: rental.id,
-        livro_id: selectedBook,
-        usuario_id: selectedUser,
-        data_aluguel: this.parseDate(rental.data_aluguel),
-        data_previsao: this.parseDate(rental.data_previsao),
-        data_devolucao:
-          rental.data_devolucao !== "..." ? rental.data_devolucao : null,
+        book: selectedBook,
+        user: selectedUser,
+        rentalDate: this.parseDate(rental.rentalDate),
+        forecastDate: this.parseDate(rental.forecastDate),
+        returnDate: rental.returnDate !== "..." ? rental.returnDate : null,
       };
       console.log(deleteAlug);
       Rental.delete(deleteAlug)
@@ -492,25 +482,24 @@ export default {
           this.closeModalDelete();
         });
     },
-    // Devolução
     openModalDevol(rental) {
       this.dialogDevol = true;
       this.update = { ...rental };
     },
     confirmDevol(rental) {
       const selectedBook = this.listBooks.find(
-        (book) => book.nome === rental.livro_id
+        (book) => book.name === rental.book
       );
       const selectedUser = this.listUsers.find(
-        (user) => user.nome === rental.usuario_id
+        (user) => user.name === rental.user
       );
       const returnedRental = {
         id: rental.id,
-        livro_id: selectedBook ? { ...selectedBook } : this.livro_id,
-        usuario_id: selectedUser ? { ...selectedUser } : this.usuario_id,
-        data_aluguel: this.parseDate(rental.data_aluguel),
-        data_previsao: this.parseDate(rental.data_previsao),
-        data_devolucao: new Date().toISOString().substr(0, 10),
+        book: selectedBook ? { ...selectedBook } : this.book,
+        user: selectedUser ? { ...selectedUser } : this.user,
+        rentalDate: this.parseDate(rental.rentalDate),
+        forecastDate: this.parseDate(rental.forecastDate),
+        returnDate: new Date().toISOString().substr(0, 10),
       };
       Rental.update(returnedRental)
         .then(() => {

@@ -51,32 +51,32 @@
               <v-col>
                 <v-col cols="12">
                   <v-text-field
-                    v-model="nome"
+                    v-model="name"
                     label="Nome"
                     required
                     :error-messages="NameError"
-                    @input="$v.nome.$touch()"
-                    @blur="$v.nome.$touch()"
+                    @input="$v.name.$touch()"
+                    @blur="$v.name.$touch()"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
-                    v-model="cidade"
+                    v-model="city"
                     label="Cidade"
                     required
                     :error-messages="CityError"
-                    @input="$v.cidade.$touch()"
-                    @blur="$v.cidade.$touch()"
+                    @input="$v.city.$touch()"
+                    @blur="$v.city.$touch()"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
-                    v-model="endereco"
+                    v-model="address"
                     label="Endereço"
                     required
                     :error-messages="AddressError"
-                    @input="$v.endereco.$touch()"
-                    @blur="$v.endereco.$touch()"
+                    @input="$v.address.$touch()"
+                    @blur="$v.address.$touch()"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
@@ -145,9 +145,9 @@ export default {
 
   mixins: [validationMixin],
   validations: {
-    nome: { required },
-    endereco: { required },
-    cidade: { required },
+    name: { required },
+    address: { required },
+    city: { required },
     email: { required, email, maxLength: maxLength(50) },
   },
   data() {
@@ -158,9 +158,9 @@ export default {
       PageTitle: "Usuários",
       headers: [
         { text: "ID", value: "id" },
-        { text: "Nome", value: "nome" },
-        { text: "Cidade", value: "cidade" },
-        { text: "Endereço", value: "endereco" },
+        { text: "Nome", value: "name" },
+        { text: "Cidade", value: "city" },
+        { text: "Endereço", value: "address" },
         { text: "Email", value: "email" },
         { text: "Ações", value: "acoes", sortable: false },
       ],
@@ -168,9 +168,9 @@ export default {
         sortByText: "Ordenar Por",
       },
       users: [],
-      nome: "",
-      endereco: "",
-      cidade: "",
+      name: "",
+      address: "",
+      city: "",
       email: "",
       dialog: false,
       dialogDelete: false,
@@ -183,20 +183,20 @@ export default {
     // validacao
     NameError() {
       const errors = [];
-      if (!this.$v.nome.$dirty) return errors;
-      !this.$v.nome.required && errors.push("Informe o nome.");
+      if (!this.$v.name.$dirty) return errors;
+      !this.$v.name.required && errors.push("Informe o nome.");
       return errors;
     },
     AddressError() {
       const errors = [];
-      if (!this.$v.endereco.$dirty) return errors;
-      !this.$v.endereco.required && errors.push("Informe o endereco.");
+      if (!this.$v.address.$dirty) return errors;
+      !this.$v.address.required && errors.push("Informe o endereco.");
       return errors;
     },
     CityError() {
       const errors = [];
-      if (!this.$v.cidade.$dirty) return errors;
-      !this.$v.cidade.required && errors.push("Informe a cidade.");
+      if (!this.$v.city.$dirty) return errors;
+      !this.$v.city.required && errors.push("Informe a cidade.");
       return errors;
     },
     EmailError() {
@@ -232,12 +232,13 @@ export default {
       this.loadingTable = true;
       try {
         const [usersResponse] = await Promise.all([User.list()]);
-
-        this.users = usersResponse.data.map((user) => ({
+        console.log(usersResponse.data.data)
+        const data = usersResponse.data;
+        this.users = data.data.map((user) => ({
           id: user.id,
-          nome: user.nome,
-          cidade: user.cidade,
-          endereco: user.endereco,
+          name: user.name,
+          city: user.city,
+          address: user.address,
           email: user.email,
         }));
         // Ordem por id
@@ -272,9 +273,9 @@ export default {
       this.dialog = true;
       this.$v.$reset();
 
-      this.nome = "";
-      this.endereco = "";
-      this.cidade = "";
+      this.name = "";
+      this.address = "";
+      this.city = "";
       this.email = "";
     },
     // Abrir o modal para editar
@@ -284,9 +285,9 @@ export default {
       this.$v.$reset();
 
       this.userId = user.id;
-      this.nome = user.nome;
-      this.endereco = user.endereco;
-      this.cidade = user.cidade;
+      this.name = user.name;
+      this.address = user.address;
+      this.city = user.city;
       this.email = user.email;
     },
     // Fechar modal
@@ -301,9 +302,9 @@ export default {
           // Identica qual modal foi ativado (Add)
           if (this.ModalTitle === "Adicionar Usuário") {
             const newuser = {
-              nome: this.nome,
-              endereco: this.endereco,
-              cidade: this.cidade,
+              name: this.name,
+              address: this.address,
+              city: this.city,
               email: this.email,
             };
             User.create(newuser)
@@ -332,9 +333,9 @@ export default {
           else {
             const editeduser = {
               id: this.userId,
-              nome: this.nome,
-              endereco: this.endereco,
-              cidade: this.cidade,
+              name: this.name,
+              address: this.address,
+              city: this.city,
               email: this.email,
             };
             User.update(editeduser)
@@ -373,9 +374,9 @@ export default {
     // Excluir
     openModalDelete(user) {
       this.userId = user.id;
-      this.nome = user.nome;
-      this.endereco = user.endereco;
-      this.cidade = user.cidade;
+      this.name = user.name;
+      this.address = user.address;
+      this.city = user.city;
       this.email = user.email;
       this.dialogDelete = true;
     },
@@ -385,9 +386,9 @@ export default {
     confirmDelete() {
       const deleteduser = {
         id: this.userId,
-        nome: this.nome,
-        endereco: this.endereco,
-        cidade: this.cidade,
+        name: this.name,
+        address: this.address,
+        city: this.city,
         email: this.email,
       };
       User.delete(deleteduser)

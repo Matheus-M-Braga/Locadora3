@@ -51,22 +51,22 @@
               <v-col>
                 <v-col cols="12">
                   <v-text-field
-                    v-model="nome"
+                    v-model="name"
                     label="Nome"
                     required
                     :error-messages="NameError"
                     @input="validateName()"
-                    @blur="$v.nome.$touch()"
+                    @blur="$v.name.$touch()"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
-                    v-model="cidade"
+                    v-model="city"
                     label="Cidade"
                     required
                     :error-messages="CityError"
-                    @input="$v.cidade.$touch()"
-                    @blur="$v.cidade.$touch()"
+                    @input="$v.city.$touch()"
+                    @blur="$v.city.$touch()"
                   ></v-text-field>
                 </v-col>
               </v-col>
@@ -122,8 +122,8 @@ export default {
   },
   mixins: [validationMixin],
   validations: {
-    nome: { required },
-    cidade: { required },
+    name: { required },
+    city: { required },
   },
   data() {
     return {
@@ -133,16 +133,17 @@ export default {
       PageTitle: "Editoras",
       headers: [
         { text: "ID", value: "id" },
-        { text: "Nome", value: "nome" },
-        { text: "Cidade", value: "cidade" },
+        { text: "Nome", value: "name" },
+        { text: "Cidade", value: "city" },
         { text: "Ações", value: "acoes", sortable: false },
       ],
       headerprops: {
         sortByText: "Ordenar Por",
       },
       publishers: [],
-      nome: "",
-      cidade: "",
+      id: 0,
+      name: "",
+      city: "",
       dialog: false,
       dialogDelete: false,
       publisherId: null,
@@ -154,8 +155,8 @@ export default {
     // validacao
     NameError() {
       const errors = [];
-      if (!this.$v.nome.$dirty) return errors;
-      !this.$v.nome.required && errors.push("Informe o nome.");
+      if (!this.$v.name.$dirty) return errors;
+      !this.$v.name.required && errors.push("Informe o nome.");
       if (this.nameExists) {
         errors.push("Editora já cadastrada!");
       }
@@ -163,13 +164,13 @@ export default {
     },
     CityError() {
       const errors = [];
-      if (!this.$v.cidade.$dirty) return errors;
-      !this.$v.cidade.required && errors.push("Informe a cidade.");
+      if (!this.$v.city.$dirty) return errors;
+      !this.$v.city.required && errors.push("Informe a cidade.");
       return errors;
     },
   },
   mounted() {
-    this.listPubli();
+    this.getPublishers();
   },
   methods: {
     updateSearch(newSearchValue) {
@@ -185,26 +186,18 @@ export default {
       );
     },
     // Listar
-    async listPubli() {
+    async getPublishers() {
       this.loadingTable = true;
       try {
-        const [publisherResponse] = await Promise.all([Publisher.list()]);
-
-        this.publishers = publisherResponse.data.map((publisher) => ({
+        const [publisherResponse] = await Promise.all([
+          Publisher.list({ Page: 1, PageSize: 15 }),
+        ]);
+        const data = publisherResponse.data.response;
+        this.publishers = data.data.map((publisher) => ({
           id: publisher.id,
-          nome: publisher.nome,
-          cidade: publisher.cidade,
-        }))
-        // Ordem por id
-        this.publishers.sort((a, b) => {
-          if (a.id > b.id) {
-            return 1;
-          } else if (a.id < b.id) {
-            return -1;
-          } else {
-            return 0;
-          }
-        });
+          name: publisher.name,
+          city: publisher.city,
+        }));
       } catch (error) {
         console.error("Erro ao buscar informações:", error);
       } finally {
@@ -212,12 +205,12 @@ export default {
       }
     },
     CheckNames() {
-      return this.publishers.some((publisher) => publisher.nome == this.nome);
+      return this.publishers.some((publisher) => publisher.name == this.name);
     },
     validateName() {
-      this.nameExists = this.CheckNames(this.nome);
+      this.nameExists = this.CheckNames(this.name);
       if (this.nameExists) {
-        this.$v.nome.$touch();
+        this.$v.name.$touch();
       }
     },
     // Abrir modal para adicionar
@@ -226,8 +219,8 @@ export default {
       this.dialog = true;
       this.$v.$reset();
 
-      this.nome = "";
-      this.cidade = "";
+      this.name = "";
+      this.city = "";
     },
     // Abrir o modal para editar
     openModalEdit(publisher) {
@@ -236,8 +229,8 @@ export default {
       this.$v.$reset();
 
       this.publisherId = publisher.id;
-      this.nome = publisher.nome;
-      this.cidade = publisher.cidade;
+      this.name = publisher.name;
+      this.city = publisher.city;
     },
     //  Fechar modal
     closeModal() {
@@ -250,8 +243,8 @@ export default {
           // Identifica qual modal foi ativado (Add)
           if (this.ModalTitle === "Adicionar Editora") {
             const newpublisher = {
-              nome: this.nome,
-              cidade: this.cidade,
+              name: this.name,
+              city: this.city,
             };
             Publisher.create(newpublisher)
               .then((response) => {
@@ -263,6 +256,7 @@ export default {
                   timer: 3500,
                 });
                 this.closeModal();
+                this.getPublishers();
               })
               .catch((error) => {
                 console.error("Erro ao adicionar editora:", error);
@@ -279,8 +273,8 @@ export default {
           else {
             const editedpublisher = {
               id: this.publisherId,
-              nome: this.nome,
-              cidade: this.cidade,
+              name: this.name,
+              city: this.city,
             };
             Publisher.update(editedpublisher)
               .then(() => {
@@ -298,13 +292,14 @@ export default {
                   timer: 3500,
                 });
                 this.closeModal();
+                this.getPublishers();
               })
               .catch((error) => {
                 console.error("Erro ao atualizar editora:", error);
                 Swal.fire({
                   icon: "error",
                   title: "Erro ao atualizar editora.",
-                  text: error.response.data.error,
+                  text: error.response.data.message,
                   showConfirmButton: false,
                   timer: 3500,
                 });
@@ -316,8 +311,8 @@ export default {
     // Excluir
     openModalDelete(publisher) {
       this.publisherId = publisher.id;
-      this.nome = publisher.nome;
-      this.cidade = publisher.cidade;
+      this.name = publisher.name;
+      this.city = publisher.city;
       this.dialogDelete = true;
     },
     closeModalDelete() {
@@ -326,8 +321,8 @@ export default {
     confirmDelete() {
       const deletedpublisher = {
         id: this.publisherId,
-        nome: this.nome,
-        cidade: this.cidade,
+        name: this.name,
+        city: this.city,
       };
       Publisher.delete(deletedpublisher)
         .then((response) => {
@@ -338,7 +333,7 @@ export default {
               showConfirmButton: false,
               timer: 3500,
             });
-            this.listPubli();
+            this.getPublishers();
           } else {
             Swal.fire({
               icon: "error",
@@ -350,10 +345,11 @@ export default {
         })
         .catch((e) => {
           console.error("Erro ao deletar a editora:", e);
+          console.log(e.response);
           Swal.fire({
             icon: "error",
             title: "Erro ao deletar editora.",
-            text: e.response.data.error,
+            text: e.response.data.message,
             showConfirmButton: false,
             timer: 3500,
           });
